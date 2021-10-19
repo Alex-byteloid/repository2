@@ -6,15 +6,24 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Code/src/main.c \
-../Code/src/system.c 
+../Code/src/messages.c \
+../Code/src/modbus.c \
+../Code/src/system.c \
+../Code/src/virtualTimers.c 
 
 OBJS += \
 ./Code/src/main.o \
-./Code/src/system.o 
+./Code/src/messages.o \
+./Code/src/modbus.o \
+./Code/src/system.o \
+./Code/src/virtualTimers.o 
 
 C_DEPS += \
 ./Code/src/main.d \
-./Code/src/system.d 
+./Code/src/messages.d \
+./Code/src/modbus.d \
+./Code/src/system.d \
+./Code/src/virtualTimers.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
