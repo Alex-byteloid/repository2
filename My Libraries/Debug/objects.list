@@ -1,3 +1,4 @@
 "./CMSIS/src/system_stm32f4xx.o"
 "./Code/src/main.o"
+"./Code/src/system.o"
 "./startup_stm32f411xe.o"
