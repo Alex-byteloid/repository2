@@ -1,0 +1,9 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	useJGitBuiltin = true
+[user]
+	name = Alex-byteloid
+	email = 75454093+Alex-byteloid@users.noreply.github.com
