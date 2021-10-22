@@ -12,6 +12,10 @@
 extern uint8_t GTimerState [MaxGTimers];
 extern uint32_t GTimerVal	[MaxGTimers];
 
+uint8_t state;				// Переменная состояния автомата
+uint8_t _state;				// Переменная предыдущего состояния автомата
+uint8_t entry;				// Флаг перехода в новое состояние
+
 /*************************	 Code	*************************/
 
 int main (void){
@@ -20,13 +24,11 @@ int main (void){
 	InitRCC();
 	InitGTimer();
 	InitHardwareTimer();
+	InitLedFSM();
 
 	while(1){
 
-		GPIOC->BSRR |= GPIO_BSRR_BR13;
-		for(uint32_t i = 0; i < 10000000; i++);
-		GPIOC->BSRR |= GPIO_BSRR_BS13;
-		for(uint32_t d = 0; d < 10000000; d++);
+		ProcessLedFSM();
 
 	}
 
