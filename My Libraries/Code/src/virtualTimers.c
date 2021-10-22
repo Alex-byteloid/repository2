@@ -13,6 +13,17 @@ uint32_t GTimerVal	[MaxGTimers];				// Хранение текущих знач�
 
 /*************************	 Code	*************************/
 
+void InitHardwareTimer (void){
+
+	SysTick->LOAD = 959999;						// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 10 мс.
+	SysTick->VAL = 959999;						// Обнуляем таймер и флаги.
+
+	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
+					SysTick_CTRL_TICKINT_Msk |
+					SysTick_CTRL_ENABLE_Msk;
+
+}
+
 void InitGTimer(void){
 
 	uint8_t i;
@@ -35,14 +46,29 @@ void StartGTimer(uint8_t GTimerID){
 
 void StopGTimer(uint8_t GTimerID){
 
-	GTimState[GTimerID] = TimerStopped;
+	GTimerState[GTimerID] = TimerStopped;
 }
 
 void PauseGTimer(uint8_t GTimerID){
 
 	if (GTimerState[GTimerID] == TimerRunning){
 
-		GTimState[GTimerID] = TimerPaused;
+		GTimerState[GTimerID] = TimerPaused;
 	}
+
+}
+
+void ReleaseGTimer(uint8_t GTimerID){
+
+	if (GTimerState[GTimerID] == TimerPaused){
+		GTimerState[GTimerID] = TimerRunning;
+
+	}
+
+}
+
+uint32_t GetGTimerVal(uint8_t GTimerID){
+
+	return GTimerVal[GTimerID];
 
 }
