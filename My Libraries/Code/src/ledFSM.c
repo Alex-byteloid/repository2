@@ -8,9 +8,9 @@
 
 /********************* Global Variables *********************/
 
-extern uint8_t state;				// Переменная состояния автомата
-extern uint8_t _state;				// Переменная предыдущего состояния автомата
-extern uint8_t entry;				// Флаг перехода в новое состояние
+uint8_t state;				// Переменная состояния автомата
+uint8_t _state;				// Переменная предыдущего состояния автомата
+uint8_t entry;				// Флаг перехода в новое состояние
 
 /*************************	 Code	*************************/
 
@@ -25,6 +25,8 @@ void ProcessLedFSM (void){
 
 	if (state != _state) entry = 1; else entry = 0;
 
+	_state = state;
+
 	switch (state){
 
 	case 0:
@@ -35,7 +37,6 @@ void ProcessLedFSM (void){
 		if (entry == 1){
 			GPIOC->BSRR |= GPIO_BSRR_BS13;
 			StartGTimer(GTimer1);
-			_state = state;
 		}
 
 		if (GetGTimerVal(GTimer1) >= 100){
@@ -48,7 +49,6 @@ void ProcessLedFSM (void){
 		if (entry == 1){
 			GPIOC->BSRR |= GPIO_BSRR_BR13;
 			StartGTimer(GTimer1);
-			_state = state;
 		}
 
 		if (GetGTimerVal(GTimer1) >= 100){
