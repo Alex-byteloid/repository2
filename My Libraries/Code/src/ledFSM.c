@@ -30,7 +30,10 @@ void ProcessLedFSM (void){
 	switch (state){
 
 	case 0:
-		state = 1;
+		if (GetMessage(LedOnMsg)){
+
+			state = 1;
+		}
 		break;
 
 	case 1:

@@ -21,10 +21,13 @@ int main (void){
 	InitGTimer();
 	InitHardwareTimer();
 	InitLedFSM();
+	InitMessage();
+	SendMessage(LedOnMsg);
 
 	while(1){
 
 		ProcessLedFSM();
+		ProcessMessage();
 
 	}
 

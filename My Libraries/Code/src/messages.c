@@ -39,11 +39,11 @@ void ProcessMessage (void){
 	}
 }
 
-char GetMessage (int Msg){
+uint8_t GetMessage (int Msg){
 
 	if(Messages[Msg] == '2'){
 		Messages[Msg] = '0';
-		return '1';
+		return 1;
 	}
-	return '0';
+	return 0;
 }

@@ -7,6 +7,7 @@
 #include "system.h"
 #include "virtualTimers.h"
 #include "ledFSM.h"
+#include "messages.h"
 
 /*************************	Define	*************************/
 
