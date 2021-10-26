@@ -13,11 +13,11 @@
 
 /*************************	 Code	*************************/
 
-void InitModbusUSART(uint32_t Speed, uint8_t ModbusMode){
+void InitModbusUSART(uint32_t Speed, uint8_t ModbusMode, uint8_t ParityControl){
 
 	/**Включение тактирования модуля USART**/
 
-	RCC->APB2ENR |= USARTClock;
+	RCC->USARTBus |= USARTClock;
 
 	/**Настройка TX на выход альтернативный пуш-пулл**/
 
@@ -38,16 +38,33 @@ void InitModbusUSART(uint32_t Speed, uint8_t ModbusMode){
 
 	/**Настройка модуля USART**/
 
-	USART->BRR = Speed;									// Установка скорости
+	if (ModbusMode == RTUMode){
 
-	USART->CR1 |= USART_CR1_RXNEIE;						// Разрешаем прерывание по приёму
+		USART->BRR = Speed;													// Установка скорости
 
-	USART->CR1 |= USART_CR1_RE;							// Включаем приемник
-	USART->CR1 |= USART_CR1_TE;							// Включаем передатчик
+		USART->CR1 |= USART_CR1_RXNEIE;										// Разрешаем прерывание по приёму
+		USART->CR1 |= USART_CR1_TXEIE;										// Разрешаем прерывание по передаче
 
-	__NVIC_EnableIRQ(IRQModbus);						// Разрешаем прерывания от USART
+		if(ParityControl == ParityControlOn){
+			USART->CR1 |= USART_CR1_PCE;									// Включение бита контроля чётности
+			USART->CR1 &= ~USART_CR1_PS;									// Включена "Чётная" чётность :)))))
+			USART->CR2 &= ~USART_CR2_STOP;									// Один стоп-бит
+			USART->CR1 |= ~USART_CR1_M;										// Структура слова: 1 Start bit, 9 Data bits, n Stop bit
+		}
 
-	USART->CR1 |= USART_CR1_UE;							// Включаем модуль USART в работу
+		if(ParityControl == ParityControlOff){
+			USART->CR1 &= ~USART_CR1_PCE;									// Выключение контроля чётности
+			USART->CR2 &= ~USART_CR2_STOP;
+			USART->CR2 |= USART_CR2_STOP_1;									// Два стоп-бита
+			USART->CR1 &= ~USART_CR1_M;										// Структура слова: 1 Start bit, 8 Data bits, n Stop bit
+		}
+
+		USART->CR1 |= USART_CR1_RE;											// Включаем приемник
+		USART->CR1 |= USART_CR1_TE;											// Включаем передатчик
+
+		USART->CR1 |= USART_CR1_UE;											// Включаем модуль USART в работу
+
+	}
 
 }
 

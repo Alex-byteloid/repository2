@@ -21,23 +21,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   8 .ARM.attributes 0000002a  00000000  00000000  00020004  2**0
                   CONTENTS, READONLY
-  9 .debug_info   0000126a  00000000  00000000  0002002e  2**0
+  9 .debug_info   0000182a  00000000  00000000  0002002e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 10 .debug_abbrev 0000065b  00000000  00000000  00021298  2**0
+ 10 .debug_abbrev 0000072a  00000000  00000000  00021858  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 11 .debug_aranges 00000150  00000000  00000000  000218f8  2**3
+ 11 .debug_aranges 00000178  00000000  00000000  00021f88  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 12 .debug_ranges 000000e8  00000000  00000000  00021a48  2**3
+ 12 .debug_ranges 00000110  00000000  00000000  00022100  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_macro  0000e06e  00000000  00000000  00021b30  2**0
+ 13 .debug_macro  0000e114  00000000  00000000  00022210  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_line   00001fae  00000000  00000000  0002fb9e  2**0
+ 14 .debug_line   000020d3  00000000  00000000  00030324  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_str    0004f955  00000000  00000000  00031b4c  2**0
+ 15 .debug_str    00050000  00000000  00000000  000323f7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .comment      00000053  00000000  00000000  000814a1  2**0
+ 16 .comment      00000053  00000000  00000000  000823f7  2**0
                   CONTENTS, READONLY
- 17 .debug_frame  00000340  00000000  00000000  000814f4  2**2
+ 17 .debug_frame  000003fc  00000000  00000000  0008244c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -916,6 +916,10 @@ void InitRCC (void){
  80006dc:	40023800 	.word	0x40023800
 
 080006e0 <InitGPIO>:
+
+	__NVIC_EnableIRQ(IRQModbus);							// Разрешаем прерывания от USART
+
+}
 
 void InitGPIO (void){
  80006e0:	b480      	push	{r7}

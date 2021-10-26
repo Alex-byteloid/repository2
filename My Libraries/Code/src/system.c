@@ -62,6 +62,15 @@ void InitRCC (void){
 
 }
 
+void UpdateNVICActiveAndPriority (void){
+
+	__NVIC_SetPriorityGrouping(3);									// 16 групп прерываний и 16 подгрупп
+	__NVIC_SetPriority(IRQModbus, NVIC_EncodePriority(0, 0, 1));	// Устанавливаем Modbus прерывание в первую группу, первым приоритетом
+
+	__NVIC_EnableIRQ(IRQModbus);									// Разрешаем прерывания от USART
+
+}
+
 void InitGPIO (void){
 
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;					// Включение тактирования порта ввода-вывода C

@@ -7,14 +7,16 @@
 
 /*************************	Define	*************************/
 
-#define SixthUSART 		USART6	// TX - A11; RX - A12
+#define SixthUSART 		6	// TX - A11; RX - A12
 
 #ifdef SixthUSART
 
 #define USART			USART6
 
 #define IRQModbus		USART6_IRQn
+
 #define Gpio 			GPIOA
+#define USARTBus		APB2ENR
 #define USARTClock		RCC_APB2ENR_USART6EN
 
 #define	TXPinPUPDR		GPIO_PUPDR_PUPD11
@@ -34,8 +36,13 @@
 
 #endif
 
-#define Baud9600		0x2710
+#define Baud9600			0x2710
 
+#define ParityControlOn		0x1
+#define ParityControlOff	0x2
+
+#define RTUMode				0x11
+#define ASCIIMode			0x12
 
 /*************************	 Code	*************************/
 

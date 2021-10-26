@@ -8,7 +8,7 @@
 
 /*************************	Define	*************************/
 
-#define MaxGTimers 3 // Максимальное количество глобальных таймеров
+#define MaxGTimers 3 						// Максимальное количество глобальных таймеров
 
 // Идентификаторы глобальных таймеров
 #define GTimer1	0
@@ -16,9 +16,9 @@
 #define GTimer3 2
 
 // Состояния таймера
-#define TimerStopped	0	// Таймер остановлен
-#define TimerRunning	1	// Таймер работает
-#define TimerPaused		2	// Таймер на паузе
+#define TimerStopped	0					// Таймер остановлен
+#define TimerRunning	1					// Таймер работает
+#define TimerPaused		2					// Таймер на паузе
 
 /*************************	 Code	*************************/
 
