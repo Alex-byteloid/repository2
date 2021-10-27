@@ -8,8 +8,20 @@
 
 /*************************	Define	*************************/
 
+#define NinthTimer			9
 #define SixthUSART 			6					// TX - A11; RX - A12
 
+/****/
+#ifdef NinthTimer
+
+#define TimerBus			APB2ENR
+#define TimerClock			RCC_APB2ENR_TIM9EN
+
+#define	Timer				TIM9
+
+#endif
+
+/****/
 #ifdef SixthUSART
 
 #define USART				USART6
@@ -38,6 +50,8 @@
 
 #endif
 
+/****/
+
 #define Baud9600			0x2710
 
 #define ParityControlOn		1
@@ -54,11 +68,12 @@
 
 /************************* Messages *************************/
 
-#define ModbusInitOk		20					// Инициализация ModbusFSM прошла успешно
-#define ModbusError			21					// Ошибка Modbus
-#define ModbusRecyiveSymbol	22					// USART-Modbus принял символ
-#define ModbusRTUTimeOut	23					// Актуально для режима RTU. Таймаут, конец сообщения
-#define ModbusOverflowError	24					// Переполнение буфера Modbus
+#define ModbusInitOk			20					// Инициализация ModbusFSM прошла успешно
+#define ModbusError				21					// Ошибка Modbus
+#define ModbusRecyiveSymbol		22					// USART-Modbus принял символ
+#define ModbusRTUTimeOut		23					// Актуально для режима RTU. Таймаут, конец сообщения
+#define ModbusOverflowError		24					// Переполнение буфера Modbus
+#define ModbusWaitingMessage	25					// Автомат в состоянии ожидания сообщения
 
 /*************************	 Code	*************************/
 

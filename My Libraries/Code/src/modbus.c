@@ -24,6 +24,16 @@ uint8_t CurrentItemOfBuf;			// Счётчик текущего элемента 
 
 /*************************	 Code	*************************/
 
+void InitModbusTimer(void){
+
+	/**Включение тактирования модуля таймера**/
+
+	RCC->TimerBus |= TimerClock;
+
+
+
+}
+
 void InitModbusUSART(uint32_t Speed, uint8_t ParityControl, uint8_t StopBit, uint8_t ModbusMode){
 
 	/**Включение тактирования модуля USART**/
@@ -91,7 +101,7 @@ void InitModbusFSM (uint8_t Baud, uint8_t Parity, uint8_t StopBit,uint8_t Modbus
 
 }
 
-void ProcessSlaveModbusRTUFSM (void){
+void ProcessReceiveModbusRTUFSM (void){
 
 	if (state != _state) entry = 1; else entry = 0;
 
@@ -101,6 +111,7 @@ void ProcessSlaveModbusRTUFSM (void){
 
 	case 0:
 		CurrentItemOfBuf = 0;
+		SendMessage(ModbusWaitingMessage);
 		if(GetMessage(ModbusRecyiveSymbol)){
 
 			state = 1;
