@@ -5,21 +5,12 @@
 
 #include "stm32f411xe.h"
 #include "messages.h"
+#include "virtualTimers.h"
+#include "CRC16.h"
 
 /*************************	Define	*************************/
 
-#define NinthTimer			9
 #define SixthUSART 			6					// TX - A11; RX - A12
-
-/****/
-#ifdef NinthTimer
-
-#define TimerBus			APB2ENR
-#define TimerClock			RCC_APB2ENR_TIM9EN
-
-#define	Timer				TIM9
-
-#endif
 
 /****/
 #ifdef SixthUSART
@@ -54,26 +45,31 @@
 
 #define Baud9600			0x2710
 
-#define ParityControlOn		1
-#define ParityControlOff	2
+#define ParityControlOn		10001
+#define ParityControlOff	10000
 
-#define OneStopBit			3
-#define TwoStopBit			4
+#define OneStopBit			10002
+#define TwoStopBit			10003
 
-#define RTUMode				5
-#define ASCIIMode			6
+#define RTUMode				10004
+#define ASCIIMode			10005
 
 #define ModbusBufSize		256
 
+#define ModbusSlaveAdress	0x5
 
 /************************* Messages *************************/
 
+/**
 #define ModbusInitOk			20					// Инициализация ModbusFSM прошла успешно
 #define ModbusError				21					// Ошибка Modbus
-#define ModbusRecyiveSymbol		22					// USART-Modbus принял символ
+#define ModbusReciveSymbol		22					// USART-Modbus принял символ
 #define ModbusRTUTimeOut		23					// Актуально для режима RTU. Таймаут, конец сообщения
 #define ModbusOverflowError		24					// Переполнение буфера Modbus
 #define ModbusWaitingMessage	25					// Автомат в состоянии ожидания сообщения
+#define ModbusCRCONotOk			26					// Несовпадение контрольной суммы
+#define ModbusMessageReceived	27					// Сообщение получено
+**/
 
 /*************************	 Code	*************************/
 

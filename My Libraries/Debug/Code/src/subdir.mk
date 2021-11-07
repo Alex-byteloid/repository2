@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Code/src/CRC16.c \
 ../Code/src/ledFSM.c \
 ../Code/src/main.c \
 ../Code/src/messages.c \
@@ -13,6 +14,7 @@ C_SRCS += \
 ../Code/src/virtualTimers.c 
 
 OBJS += \
+./Code/src/CRC16.o \
 ./Code/src/ledFSM.o \
 ./Code/src/main.o \
 ./Code/src/messages.o \
@@ -21,6 +23,7 @@ OBJS += \
 ./Code/src/virtualTimers.o 
 
 C_DEPS += \
+./Code/src/CRC16.d \
 ./Code/src/ledFSM.d \
 ./Code/src/main.d \
 ./Code/src/messages.d \

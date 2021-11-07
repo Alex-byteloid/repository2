@@ -3,8 +3,7 @@
 
 /*Пока реализация такова:
  * По приёму первого байта, заходим в прерывание USART, там пишем сообщение приёма символа, переводим автомат в состояние №1(Приём сообщения).
- * В этом состоянии в первом проходе отключаем прерывания от таймера SysTick, чтобы он не перебивал нам прерывания от USART. Считать при этом как я понимаю он не перестаёт.
- * Также нужно инициализировать доп таймер, который будет считать тайм аут без приёма сообщения, примерно так:
+ * Также нужно РЕинициализировать SysTick таймер, который будет считать тайм аут без приёма сообщения, примерно так:
  * При прерывании USART по приёму байта, обнуляем счётчик таймера, он начинает считать с нуля. Как только приём закончен, таймер может досчитать до нужной нам велечины
  * и в своём перерывании пошлёт сообщение ModbusRTUTimeOut, что приведёт к переходу автомата в состояние 2.
 */
@@ -17,22 +16,16 @@
 uint8_t state;						// Переменная состояния автомата
 uint8_t _state;						// Переменная предыдущего состояния автомата
 uint8_t entry;						// Флаг перехода в новое состояние
+extern uint8_t SysTickHandlerState;	// Переменная состояния системного таймера
 
 uint8_t ModbusData[ModbusBufSize];	// Буфер данных Modbus
 
 uint8_t CurrentItemOfBuf;			// Счётчик текущего элемента буфера Modbus
 
+uint16_t CRCVal;					// Вычисленное значение контрольной суммы
+uint16_t CRCRecVal;				// Принятое значение контрольной суммы
+
 /*************************	 Code	*************************/
-
-void InitModbusTimer(void){
-
-	/**Включение тактирования модуля таймера**/
-
-	RCC->TimerBus |= TimerClock;
-
-
-
-}
 
 void InitModbusUSART(uint32_t Speed, uint8_t ParityControl, uint8_t StopBit, uint8_t ModbusMode){
 
@@ -101,7 +94,7 @@ void InitModbusFSM (uint8_t Baud, uint8_t Parity, uint8_t StopBit,uint8_t Modbus
 
 }
 
-void ProcessReceiveModbusRTUFSM (void){
+void ProcessSlaveModbusRTUFSM (void){
 
 	if (state != _state) entry = 1; else entry = 0;
 
@@ -112,7 +105,7 @@ void ProcessReceiveModbusRTUFSM (void){
 	case 0:
 		CurrentItemOfBuf = 0;
 		SendMessage(ModbusWaitingMessage);
-		if(GetMessage(ModbusRecyiveSymbol)){
+		if(GetMessage(ModbusReciveSymbol)){
 
 			state = 1;
 		}
@@ -122,10 +115,11 @@ void ProcessReceiveModbusRTUFSM (void){
 	case 1:
 
 		if (entry == 1){
-			SysTick->CTRL = ~SysTick_CTRL_TICKINT_Msk;
+			SysTick->LOAD = 18000;									// Загрузка значения перезагрузки. Вроде при 9600 бод это полтора символа (больше) и частоте шины 96 МГц
+			SysTick->VAL = 18000;									// Обнуляем таймер и флаги.
 		}
 
-		if(GetMessage(ModbusRecyiveSymbol)){
+		if(GetMessage(ModbusReciveSymbol)){
 			state = 1;
 		}
 
@@ -142,9 +136,43 @@ void ProcessReceiveModbusRTUFSM (void){
 
 	case 2:
 		if (entry == 1){
-			SysTick->CTRL = SysTick_CTRL_TICKINT_Msk;
+			InitHardwareTimer();											// Реинициализируем системный таймер и переводим обработчик его прерывания в состояние 0
 		}
 
+		if (ModbusData[0] == ModbusSlaveAdress || ModbusData[0] == 0x00){	// Если адрес совпал, переходим в состояние 3 (вычисление CRC)
+			state = 3;
+		}
+		else {
+			state = 0;														// Eсли адрес не совпадает с адресом устройства или широковещательным, переходим в состояние 0 (ожидание приёма сообщения)
+			for(uint8_t i = 0; i < CurrentItemOfBuf; i++){
+				ModbusData[i] = 0;											// Затираем принятое сообщение Modbus
+			}
+		}
+
+		break;
+
+	case 3:
+
+		CRCVal = CRC16(ModbusData, CurrentItemOfBuf);						// Вычисляем CRC16
+
+		uint8_t CrcHi;
+		uint8_t CrcLo;
+
+		CrcHi = ModbusData [CurrentItemOfBuf - 2];
+		CrcLo = ModbusData [CurrentItemOfBuf - 1];
+
+		CRCRecVal = ((CrcHi << 8) | CrcLo);									// Записываем во временную переменную значение принятой контрольной суммы
+
+		if (CRCVal == CRCRecVal) {											// Сравниваем значения контрольных сумм
+			state = 4;
+			SendMessage(ModbusMessageReceived);								// Сообщение Modbus получено
+		}
+		else {
+			SendMessage(ModbusCRCNotOk);
+			state = 6;
+		}
+
+		break;
 
 	}
 
@@ -152,12 +180,12 @@ void ProcessReceiveModbusRTUFSM (void){
 
 void USART_IRQHandler (void){
 
-	if (USART->SR & USART_SR_RXNE){
-
-		ModbusData[CurrentItemOfBuf] = USART->DR;
-		CurrentItemOfBuf++;
-		SendMessage(ModbusRecyiveSymbol);
+	if (USART->SR & USART_SR_RXNE_Msk){
+		SysTick->VAL = 18000;										// Обнуляем таймер и флаги
+		SysTickHandlerState = 1;									// Обработчик прерывания системного таймера переводим в состояние 1
+		ModbusData[CurrentItemOfBuf] = USART->DR;					// Помещаем содержимое регистра данных USART  буфер сообщения Modbus
+		CurrentItemOfBuf++;											// Инкрементируем указатель на текущий элемент буфера
+		SendMessage(ModbusReciveSymbol);							// Помечаем активным сообщение "Modbus recyive symbol"
 	}
 
 }
-

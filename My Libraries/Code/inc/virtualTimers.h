@@ -4,6 +4,7 @@
 /************************* Includes *************************/
 
 #include "stm32f411xe.h"
+#include "messages.h"
 #include "core_cm4.h"
 
 /*************************	Define	*************************/
@@ -29,3 +30,6 @@ void StopGTimer(uint8_t GTimerID);			// Функция остановки выб
 void PauseGTimer(uint8_t GTimerID);			// Функция приостановки выбранного глобального таймера
 void ReleaseGTimer(uint8_t GTimerID);		// Функция продолжения счета выбранного глобального таймера
 uint32_t GetGTimerVal(uint8_t GTimerID);	// Функция получения значения выбранного глобального таймера
+void StopAllGtimer(void);					// Функция остановки всех работающих глобальных таймеров
+void ReleaseAllGTimer (void);				// Функция запуска всех остановленных таймеров
+void SysTick_Handler(void);					// Обработчик прерывания от системного таймера

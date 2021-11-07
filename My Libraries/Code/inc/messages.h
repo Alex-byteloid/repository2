@@ -7,9 +7,19 @@
 
 /*************************	Define	*************************/
 
-#define MaxNumbMessages		5
+#define MaxNumbMessages		20
 
 #define LedOnMsg			0
+
+
+#define ModbusInitOk			20					// Инициализация ModbusFSM прошла успешно
+#define ModbusError				21					// Ошибка Modbus
+#define ModbusReciveSymbol		22					// USART-Modbus принял символ
+#define ModbusRTUTimeOut		23					// Актуально для режима RTU. Таймаут, конец сообщения
+#define ModbusOverflowError		24					// Переполнение буфера Modbus
+#define ModbusWaitingMessage	25					// Автомат в состоянии ожидания сообщения
+#define ModbusCRCNotOk			26					// Несовпадение контрольной суммы
+#define ModbusMessageReceived	27					// Сообщение получено
 
 /*************************	 Code	*************************/
 

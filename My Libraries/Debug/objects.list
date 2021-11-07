@@ -1,4 +1,5 @@
 "./CMSIS/src/system_stm32f4xx.o"
+"./Code/src/CRC16.o"
 "./Code/src/ledFSM.o"
 "./Code/src/main.o"
 "./Code/src/messages.o"
