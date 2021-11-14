@@ -174,6 +174,12 @@ void ProcessSlaveModbusRTUFSM (void){
 
 		break;
 
+	case 4:
+
+
+
+		break;
+
 	}
 
 }
