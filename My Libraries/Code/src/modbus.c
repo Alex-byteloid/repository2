@@ -280,7 +280,7 @@ void USART6_IRQHandler (void){
 //		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 		SysTick->LOAD = 29999;									// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 1 мс.
 		SysTick->VAL = 29999;									// Обнуляем таймер и флаги.
-//		SysTickHandlerState = 1;
+		SysTickHandlerState = 1;
 		ModbusData[CurrentItemOfBuf] = USART->DR;				// Помещаем содержимое регистра данных USART  буфер сообщения Modbus
 		CurrentItemOfBuf++;										// Инкрементируем указатель на текущий элемент буфера
 		state = 1;

@@ -22,13 +22,15 @@ int main (void){
 //	UpdateNVICActiveAndPriority();
 	InitHardwareTimer();
 	InitMessage();
-//	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
-//	GPIOC->BSRR |= GPIO_BSRR_BR14;
+	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
+	GPIOC->BSRR |= GPIO_BSRR_BR14;
+//	SendMessage(LedOnMsg);
 
 	while(1){
 
-//		ProcessModbusSlaveFSM();
-		ProcessLedFSM();
+		ProcessModbusSlaveFSM();
+//		ProcessLedFSM();
+		ProcessMessage();
 
 	}
 

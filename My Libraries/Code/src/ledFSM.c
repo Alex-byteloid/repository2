@@ -42,7 +42,7 @@ void ProcessLedFSM (void){
 			StartGTimer(GTimer1);
 		}
 
-		if (GetGTimerVal(GTimer1) >= 100){
+		if (GetGTimerVal(GTimer1) >= 1000){
 			state = 2;
 			StopGTimer(GTimer1);
 		}
@@ -54,7 +54,7 @@ void ProcessLedFSM (void){
 			StartGTimer(GTimer1);
 		}
 
-		if (GetGTimerVal(GTimer1) >= 100){
+		if (GetGTimerVal(GTimer1) >= 1000){
 			state = 1;
 			StopGTimer(GTimer1);
 		}
