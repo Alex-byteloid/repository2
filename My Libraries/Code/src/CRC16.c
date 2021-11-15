@@ -62,7 +62,7 @@ uint16_t CRC16(uint8_t *p, uint16_t len){
 	uint8_t crc_lo;
 	uint8_t n;
 
-	if (len > 256U) return (0);
+	if (len > 256) return (0);
 
 	n = (uint8_t)len;
 
@@ -76,6 +76,6 @@ uint16_t CRC16(uint8_t *p, uint16_t len){
 	}
 	while (--n);         								// pass through message buffer (max 256 items)
 
-	return ((crc_hi << 8) | crc_lo);
+	return ((crc_lo << 8) | crc_hi);
 
 	}

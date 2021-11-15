@@ -43,8 +43,9 @@ void SysTick_Handler(void){
 
 	case 1:
 		SendMessage(ModbusRTUTimeOut);
-		GPIOC->BSRR |= GPIO_BSRR_BS13;
+		SysTickHandlerState = 0;
 		break;
+
 	}
 
 }

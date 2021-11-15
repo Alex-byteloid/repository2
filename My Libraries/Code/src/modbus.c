@@ -99,6 +99,7 @@ void InitModbusFSM (uint32_t Baud, uint32_t Parity, uint32_t StopBit,uint32_t Mo
 	entry = 0;
 	stateMessageGenSlave = _stateMessageGenSlave = 0;
 	entryMessageGenSlave = 0;
+	CurrentItemOfBuf = 0;
 
 }
 
@@ -116,26 +117,27 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 			CurrentItemOfBuf = 0;
 		}
 //		SendMessage(ModbusWaitingMessage);
-/*		if(GetMessage(ModbusReciveSymbol)){
+		if(GetMessage(ModbusReciveSymbol)){
 
 			state = 1;
 		}
-*/
+
 		break;
 
 	case 1:
 
-		if (entry == 1){
-			__disable_fault_irq();
+/*		if (entry == 1){
+//			__disable_fault_irq();
+//			PauseGTimer(GTimer1);
 		}
-
+*/
 /*		if(GetMessage(ModbusReciveSymbol)){
 			state = 1;
 		}
 */
 
 		if(CurrentItemOfBuf >= ModbusBufSize){
-			SendMessage(ModbusOverflowError);
+//			SendMessage(ModbusOverflowError);
 			state = 4;
 		}
 
@@ -147,9 +149,16 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 
 	case 2:
 
+		GPIOC->BSRR |= GPIO_BSRR_BS14;
+
 		if (entry == 1){
-			__enable_fault_irq();
-			InitHardwareTimer();
+//			__enable_fault_irq();
+			SysTickHandlerState = 0;					// Обработчик прерывания системного таймера в состоянии 0
+
+				SysTick->LOAD = 95999;						// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 1 мс.
+				SysTick->VAL = 95999;						// Обнуляем таймер и флаги.
+			//InitHardwareTimer();
+//			ReleaseGTimer(GTimer1);
 		}
 
 		if (ModbusData[0] == ModbusSlaveAdress || ModbusData[0] == 0x00){	// Если адрес совпал, переходим в состояние 3 (вычисление CRC)
@@ -180,9 +189,9 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 			SendMessage(ModbusMessageReceived);								// Сообщение Modbus получено
 		}
 		else {
-			GPIOC->BSRR |= GPIO_BSRR_BS13;
 			SendMessage(ModbusCRCNotOk);
 			state = 4;
+			GPIOC->BSRR |= GPIO_BSRR_BS13;
 
 		}
 
@@ -191,7 +200,7 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 	case 4:
 
 		SendMessage(ModbusError);
-		GPIOC->BSRR |= GPIO_BSRR_BS14;
+		//GPIOC->BSRR |= GPIO_BSRR_BS14;
 		state = 0;
 
 		break;
@@ -276,19 +285,21 @@ void ProcessModbusSlaveFSM (void){
 
 void USART6_IRQHandler (void){
 
-	if (USART->SR & USART_SR_RXNE){
+	if (USART6->SR & USART_SR_RXNE){
 //		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
-		SysTick->LOAD = 29999;									// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 1 мс.
-		SysTick->VAL = 29999;									// Обнуляем таймер и флаги.
+		SysTick->LOAD = 150000;									// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 1 мс.
+		SysTick->VAL = 150000;									// Обнуляем таймер и флаги.
 		SysTickHandlerState = 1;
 		ModbusData[CurrentItemOfBuf] = USART->DR;				// Помещаем содержимое регистра данных USART  буфер сообщения Modbus
 		CurrentItemOfBuf++;										// Инкрементируем указатель на текущий элемент буфера
-		state = 1;
+		SendMessage(ModbusReciveSymbol);
 	}
 
+
 /*	if (USART->SR & USART_SR_IDLE){
-//		SysTick->CTRL = SysTick_CTRL_TICKINT_Msk;
-//		state = 2;
+		SysTick->CTRL = SysTick_CTRL_TICKINT_Msk;
+		state = 2;
+		GPIOC->BSRR |= GPIO_BSRR_BS13;
 		USART->SR;
 	}
 */

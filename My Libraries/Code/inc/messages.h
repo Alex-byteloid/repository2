@@ -7,7 +7,7 @@
 
 /*************************	Define	*************************/
 
-#define MaxNumbMessages		100
+#define MaxNumbMessages		30
 
 #define LedOnMsg			0
 

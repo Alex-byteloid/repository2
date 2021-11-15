@@ -23,10 +23,12 @@ void InitMessage (void){
 
 void SendMessage (int Msg){
 
-	if (Messages[Msg] == '0'){
+	Messages[Msg] = '1';
+
+/*	if (Messages[Msg] == '0'){
 
 		Messages[Msg] = '1';
-	}
+	}*/
 }
 
 void ProcessMessage (void){

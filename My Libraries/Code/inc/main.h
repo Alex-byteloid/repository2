@@ -8,7 +8,7 @@
 #include "virtualTimers.h"
 #include "ledFSM.h"
 #include "messages.h"
-//#include "modbus.h"
+#include "modbus.h"
 
 /*************************	Define	*************************/
 

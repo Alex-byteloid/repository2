@@ -13,13 +13,12 @@
 
 /*************************	 Code	*************************/
 
-
 int main (void){
 
 	InitGPIO();
 	InitRCC();
 	InitGTimer();
-//	UpdateNVICActiveAndPriority();
+	UpdateNVICActiveAndPriority();
 	InitHardwareTimer();
 	InitMessage();
 	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
@@ -28,7 +27,8 @@ int main (void){
 
 	while(1){
 
-		ProcessModbusSlaveFSM();
+		ProcessSlaveModbusMessageReceptionRTUFSM();
+		ProcessMessageGenerationSlaveModbusRTUFSM();
 //		ProcessLedFSM();
 		ProcessMessage();
 
