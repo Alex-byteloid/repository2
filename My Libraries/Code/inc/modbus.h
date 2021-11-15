@@ -18,7 +18,7 @@
 #define USART				USART6
 
 #define IRQModbus			USART6_IRQn
-#define USART_IRQHandler	USART6_IRQHandler
+//#define USART_IRQHandler	USART6_IRQHandler
 
 #define Gpio 				GPIOA
 #define USARTBus			APB2ENR
@@ -56,12 +56,12 @@
 
 #define ModbusBufSize		256
 
-#define ModbusSlaveAdress	0x5
+#define ModbusSlaveAdress	0x12
 
 /************************* Messages *************************/
 
 /**
-#define ModbusInitOk			20					// Инициализация ModbusFSM прошла успешно
+
 #define ModbusError				21					// Ошибка Modbus
 #define ModbusReciveSymbol		22					// USART-Modbus принял символ
 #define ModbusRTUTimeOut		23					// Актуально для режима RTU. Таймаут, конец сообщения
@@ -73,5 +73,10 @@
 
 /*************************	 Code	*************************/
 
-void InitModbusUSART(uint32_t Speed, uint8_t ParityControl, uint8_t StopBit, uint8_t ModbusMode);
+void InitModbusUSART(uint32_t Speed, uint32_t ParityControl, uint32_t StopBit, uint32_t ModbusMode);
+void InitModbusFSM (uint32_t Baud, uint32_t Parity, uint32_t StopBit,uint32_t ModbusMode);
+void ProcessSlaveModbusMessageReceptionRTUFSM (void);
+void ProcessMessageGenerationSlaveModbusRTUFSM (void);
+void ProcessModbusSlaveFSM (void);
+void USART6_IRQHandler (void);
 

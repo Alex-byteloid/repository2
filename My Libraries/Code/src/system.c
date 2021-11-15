@@ -64,9 +64,10 @@ void InitRCC (void){
 
 void UpdateNVICActiveAndPriority (void){
 
-	__NVIC_SetPriorityGrouping(3);									// 16 групп прерываний и 16 подгрупп
-	__NVIC_SetPriority(IRQModbus, NVIC_EncodePriority(0, 0, 1));	// Устанавливаем Modbus прерывание в первую группу, первым приоритетом
+//	__NVIC_SetPriorityGrouping(3);									// 16 групп прерываний и 16 подгрупп
+//	__NVIC_SetPriority(IRQModbus, NVIC_EncodePriority(0, 0, 1));	// Устанавливаем Modbus прерывание в первую группу, первым приоритетом
 
+	__enable_irq();
 	__NVIC_EnableIRQ(IRQModbus);									// Разрешаем прерывания от USART
 
 }
@@ -75,7 +76,7 @@ void InitGPIO (void){
 
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;					// Включение тактирования порта ввода-вывода C
 //	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;					// Включение тактирования порта ввода-вывода B
-//	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;					// Включение тактирования порта ввода-вывода A
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;					// Включение тактирования порта ввода-вывода A
 
 	GPIOC->OTYPER &= ~GPIO_OTYPER_OT13;						// Настройка порта PC13 на выход push-pull
 	GPIOC->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR13;
@@ -84,4 +85,11 @@ void InitGPIO (void){
 	GPIOC->MODER &= ~GPIO_MODER_MODE13;
 	GPIOC->MODER |= GPIO_MODER_MODE13_0;					// Настройка порта PC13 на выход
 
+/*	GPIOC->OTYPER &= ~GPIO_OTYPER_OT14;						// Настройка порта PC14 на выход push-pull
+	GPIOC->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR14;
+	GPIOC->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR14;				// Настройка на высокую выходную скорость
+	GPIOC->PUPDR &= ~GPIO_PUPDR_PUPD14;						// No pull, no down (без подтяжки к плюсу или минусу питания)
+	GPIOC->MODER &= ~GPIO_MODER_MODE14;
+	GPIOC->MODER |= GPIO_MODER_MODE14_0;					// Настройка порта PC14 на выход
+*/
 }

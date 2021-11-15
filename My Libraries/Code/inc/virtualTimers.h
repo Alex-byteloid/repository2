@@ -23,6 +23,7 @@
 
 /*************************	 Code	*************************/
 
+void SysTick_Handler(void);					// Обработчик прерывания от системного таймера
 void InitHardwareTimer (void);				// Функция инициализации аппаратного таймера SysTick
 void InitGTimer(void);						// Функция инициализации глобальных таймеров
 void StartGTimer(uint8_t GTimerID);			// Функция зауска выбранного глобального таймера
@@ -30,6 +31,4 @@ void StopGTimer(uint8_t GTimerID);			// Функция остановки выб
 void PauseGTimer(uint8_t GTimerID);			// Функция приостановки выбранного глобального таймера
 void ReleaseGTimer(uint8_t GTimerID);		// Функция продолжения счета выбранного глобального таймера
 uint32_t GetGTimerVal(uint8_t GTimerID);	// Функция получения значения выбранного глобального таймера
-void StopAllGtimer(void);					// Функция остановки всех работающих глобальных таймеров
-void ReleaseAllGTimer (void);				// Функция запуска всех остановленных таймеров
-void SysTick_Handler(void);					// Обработчик прерывания от системного таймера
+

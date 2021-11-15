@@ -13,21 +13,26 @@
 
 /********************* Global Variables *********************/
 
-uint8_t state;						// Переменная состояния автомата
-uint8_t _state;						// Переменная предыдущего состояния автомата
-uint8_t entry;						// Флаг перехода в новое состояние
-extern uint8_t SysTickHandlerState;	// Переменная состояния системного таймера
+uint8_t state;								// Переменная состояния автомата
+uint8_t _state;								// Переменная предыдущего состояния автомата
+uint8_t entry;								// Флаг перехода в новое состояние
+extern uint8_t SysTickHandlerState;			// Переменная состояния системного таймера
 
-uint8_t ModbusData[ModbusBufSize];	// Буфер данных Modbus
+uint8_t stateMessageGenSlave;				// Переменная состояния автомата генерации ответного сообщения
+uint8_t _stateMessageGenSlave;				// Переменная предыдущего состояния автомата генерации ответного сообщения
+uint8_t entryMessageGenSlave;				// Флаг перехода в новое состояние для автомата генерации ответного сообщения
 
-uint8_t CurrentItemOfBuf;			// Счётчик текущего элемента буфера Modbus
+uint8_t ModbusData[ModbusBufSize];			// Буфер приёма данных Modbus
+uint8_t ModbusSendData[ModbusBufSize];		// Буфер отправки сообщений Modbus
 
-uint16_t CRCVal;					// Вычисленное значение контрольной суммы
-uint16_t CRCRecVal;				// Принятое значение контрольной суммы
+uint8_t CurrentItemOfBuf;					// Счётчик текущего элемента буфера Modbus
+
+uint16_t CRCVal;							// Вычисленное значение контрольной суммы
+uint16_t CRCRecVal;							// Принятое значение контрольной суммы
 
 /*************************	 Code	*************************/
 
-void InitModbusUSART(uint32_t Speed, uint8_t ParityControl, uint8_t StopBit, uint8_t ModbusMode){
+void InitModbusUSART(uint32_t Speed, uint32_t ParityControl, uint32_t StopBit, uint32_t ModbusMode){
 
 	/**Включение тактирования модуля USART**/
 
@@ -57,7 +62,7 @@ void InitModbusUSART(uint32_t Speed, uint8_t ParityControl, uint8_t StopBit, uin
 		USART->BRR = Speed;													// Установка скорости
 
 		USART->CR1 |= USART_CR1_RXNEIE;										// Разрешаем прерывание по приёму
-		USART->CR1 |= USART_CR1_TXEIE;										// Разрешаем прерывание по передаче
+//		USART->CR1 |= USART_CR1_TXEIE;										// Разрешаем прерывание по передаче
 
 		if(ParityControl == ParityControlOn){
 			USART->CR1 |= USART_CR1_PCE;									// Включение бита контроля чётности
@@ -76,6 +81,8 @@ void InitModbusUSART(uint32_t Speed, uint8_t ParityControl, uint8_t StopBit, uin
 		USART->CR1 &= ~USART_CR1_M;											// Структура слова: 1 Start bit, 8 Data bits, n Stop bit
 //		USART->CR1 |= ~USART_CR1_M;											// Структура слова: 1 Start bit, 9 Data bits, n Stop bit
 
+
+//		USART->CR1 |= USART_CR1_IDLEIE;										// Включаем детектирование свободной линии
 		USART->CR1 |= USART_CR1_RE;											// Включаем приемник
 		USART->CR1 |= USART_CR1_TE;											// Включаем передатчик
 
@@ -85,16 +92,17 @@ void InitModbusUSART(uint32_t Speed, uint8_t ParityControl, uint8_t StopBit, uin
 
 }
 
-void InitModbusFSM (uint8_t Baud, uint8_t Parity, uint8_t StopBit,uint8_t ModbusMode){
+void InitModbusFSM (uint32_t Baud, uint32_t Parity, uint32_t StopBit,uint32_t ModbusMode){
 
 	InitModbusUSART(Baud, Parity, StopBit, ModbusMode);
 	state = _state = 0;
 	entry = 0;
-	SendMessage(ModbusInitOk);
+	stateMessageGenSlave = _stateMessageGenSlave = 0;
+	entryMessageGenSlave = 0;
 
 }
 
-void ProcessSlaveModbusRTUFSM (void){
+void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 
 	if (state != _state) entry = 1; else entry = 0;
 
@@ -103,29 +111,32 @@ void ProcessSlaveModbusRTUFSM (void){
 	switch (state){
 
 	case 0:
-		CurrentItemOfBuf = 0;
-		SendMessage(ModbusWaitingMessage);
-		if(GetMessage(ModbusReciveSymbol)){
+
+		if (entry == 1){
+			CurrentItemOfBuf = 0;
+		}
+//		SendMessage(ModbusWaitingMessage);
+/*		if(GetMessage(ModbusReciveSymbol)){
 
 			state = 1;
 		}
-
+*/
 		break;
 
 	case 1:
 
 		if (entry == 1){
-			SysTick->LOAD = 18000;									// Загрузка значения перезагрузки. Вроде при 9600 бод это полтора символа (больше) и частоте шины 96 МГц
-			SysTick->VAL = 18000;									// Обнуляем таймер и флаги.
+			__disable_fault_irq();
 		}
 
-		if(GetMessage(ModbusReciveSymbol)){
+/*		if(GetMessage(ModbusReciveSymbol)){
 			state = 1;
 		}
+*/
 
 		if(CurrentItemOfBuf >= ModbusBufSize){
 			SendMessage(ModbusOverflowError);
-			state = 6;
+			state = 4;
 		}
 
 		if(GetMessage(ModbusRTUTimeOut)){
@@ -135,8 +146,10 @@ void ProcessSlaveModbusRTUFSM (void){
 		break;
 
 	case 2:
+
 		if (entry == 1){
-			InitHardwareTimer();											// Реинициализируем системный таймер и переводим обработчик его прерывания в состояние 0
+			__enable_fault_irq();
+			InitHardwareTimer();
 		}
 
 		if (ModbusData[0] == ModbusSlaveAdress || ModbusData[0] == 0x00){	// Если адрес совпал, переходим в состояние 3 (вычисление CRC)
@@ -164,19 +177,22 @@ void ProcessSlaveModbusRTUFSM (void){
 		CRCRecVal = ((CrcHi << 8) | CrcLo);									// Записываем во временную переменную значение принятой контрольной суммы
 
 		if (CRCVal == CRCRecVal) {											// Сравниваем значения контрольных сумм
-			state = 4;
 			SendMessage(ModbusMessageReceived);								// Сообщение Modbus получено
 		}
 		else {
+			GPIOC->BSRR |= GPIO_BSRR_BS13;
 			SendMessage(ModbusCRCNotOk);
-			state = 6;
+			state = 4;
+
 		}
 
 		break;
 
 	case 4:
 
-
+		SendMessage(ModbusError);
+		GPIOC->BSRR |= GPIO_BSRR_BS14;
+		state = 0;
 
 		break;
 
@@ -184,14 +200,100 @@ void ProcessSlaveModbusRTUFSM (void){
 
 }
 
-void USART_IRQHandler (void){
+void ProcessMessageGenerationSlaveModbusRTUFSM (void){
 
-	if (USART->SR & USART_SR_RXNE_Msk){
-		SysTick->VAL = 18000;										// Обнуляем таймер и флаги
-		SysTickHandlerState = 1;									// Обработчик прерывания системного таймера переводим в состояние 1
-		ModbusData[CurrentItemOfBuf] = USART->DR;					// Помещаем содержимое регистра данных USART  буфер сообщения Modbus
-		CurrentItemOfBuf++;											// Инкрементируем указатель на текущий элемент буфера
-		SendMessage(ModbusReciveSymbol);							// Помечаем активным сообщение "Modbus recyive symbol"
+	if (stateMessageGenSlave != _stateMessageGenSlave) entryMessageGenSlave = 1; else entryMessageGenSlave = 0;
+
+	_stateMessageGenSlave = stateMessageGenSlave;
+
+	switch (stateMessageGenSlave){
+
+	case 0:
+		if (GetMessage(ModbusMessageReceived)){
+			stateMessageGenSlave = 1;
+		}
+			break;
+
+	case 1:
+
+		if (ModbusData[1] == 0x05){
+
+			if (ModbusData[3] == 0x50){
+
+				if (ModbusData[4] == 0xff){
+
+
+
+					for (uint8_t i = 0; i < CurrentItemOfBuf; i++){
+						ModbusSendData[i] = ModbusData[i];
+					}
+					stateMessageGenSlave = 2;
+				}
+
+				if (ModbusData[4] == 0x00){
+
+					GPIOC->BSRR |= GPIO_BSRR_BS13;
+
+					for (uint8_t i = 0; i < CurrentItemOfBuf; i++){
+						ModbusSendData[i] = ModbusData[i];
+					}
+					stateMessageGenSlave = 2;
+				}
+				break;
+
+			}
+
+		}
+
+		break;
+
+	case 2:
+
+
+		for(uint8_t i = 0; i < CurrentItemOfBuf; ){
+
+			while (!(USART->SR & USART_SR_TC));
+
+				USART->DR = ModbusSendData[i];
+				i++;
+
+		}
+
+		stateMessageGenSlave = 0;
+		break;
+
+	}
+}
+
+
+void ProcessModbusSlaveFSM (void){
+
+	ProcessSlaveModbusMessageReceptionRTUFSM();
+	ProcessMessageGenerationSlaveModbusRTUFSM();
+
+}
+
+
+void USART6_IRQHandler (void){
+
+	if (USART->SR & USART_SR_RXNE){
+//		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+		SysTick->LOAD = 29999;									// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 1 мс.
+		SysTick->VAL = 29999;									// Обнуляем таймер и флаги.
+//		SysTickHandlerState = 1;
+		ModbusData[CurrentItemOfBuf] = USART->DR;				// Помещаем содержимое регистра данных USART  буфер сообщения Modbus
+		CurrentItemOfBuf++;										// Инкрементируем указатель на текущий элемент буфера
+		state = 1;
+	}
+
+/*	if (USART->SR & USART_SR_IDLE){
+//		SysTick->CTRL = SysTick_CTRL_TICKINT_Msk;
+//		state = 2;
+		USART->SR;
+	}
+*/
+	if (USART->SR & USART_SR_ORE){
+		state = 4;
 	}
 
 }

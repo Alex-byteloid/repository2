@@ -11,13 +11,13 @@
 uint8_t GTimerState [MaxGTimers];				// Хранение текущих состояний глобальных таймеров
 uint32_t GTimerVal	[MaxGTimers];				// Хранение текущих значений глобальных таймеров
 
-uint8_t SysTickHandlerState;					// Переменная состаяния обработчика прерывания системного таймера для работы с Modbus
+//uint8_t SysTickHandlerState;					// Переменная состаяния обработчика прерывания системного таймера для работы с Modbus
 
 /*************************	 Code	*************************/
 
 void InitHardwareTimer (void){
 
-	SysTickHandlerState = 0;					// Обработчик прерывания системного таймера в состоянии 0
+//	SysTickHandlerState = 0;					// Обработчик прерывания системного таймера в состоянии 0
 
 	SysTick->LOAD = 95999;						// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 1 мс.
 	SysTick->VAL = 95999;						// Обнуляем таймер и флаги.
@@ -30,30 +30,29 @@ void InitHardwareTimer (void){
 
 void SysTick_Handler(void){
 
-	switch (SysTickHandlerState){
+//	switch (SysTickHandlerState){
 
-	case 0:
+//	case 0:
 		for(uint8_t i = 0; i < MaxGTimers; i++){
 
 			if (GTimerState[i] == TimerRunning){
 				GTimerVal[i]++;
 			}
 		}
-		break;
+//		break;
 
-	case 1:
+/*	case 1:
 		SendMessage(ModbusRTUTimeOut);
+		GPIOC->BSRR |= GPIO_BSRR_BS13;
 		break;
 	}
-
+*/
 }
 
 
 void InitGTimer(void){
 
 	uint8_t i;
-
-
 
 	for (i = 0; i < MaxGTimers; i++){
 		GTimerState[i] = TimerStopped;
@@ -93,31 +92,6 @@ void ReleaseGTimer(uint8_t GTimerID){
 	}
 
 }
-
-void StopAllGtimer(void){
-
-	for (uint8_t i = 0; i < MaxGTimers; i++){
-
-		if (GTimerState[i] == TimerRunning){
-			GTimerState[i] = TimerStopped;
-		}
-
-	}
-
-}
-
-void ReleaseAllGTimer (void){
-
-	for (uint8_t i = 0; i < MaxGTimers; i++){
-
-		if (GTimerState[i] == TimerStopped){
-			GTimerState[i] = TimerRunning;
-		}
-
-	}
-
-}
-
 
 uint32_t GetGTimerVal(uint8_t GTimerID){
 
