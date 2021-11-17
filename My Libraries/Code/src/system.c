@@ -92,4 +92,10 @@ void InitGPIO (void){
 	GPIOC->MODER &= ~GPIO_MODER_MODE14;
 	GPIOC->MODER |= GPIO_MODER_MODE14_0;					// Настройка порта PC14 на выход
 
+	GPIOC->OTYPER &= ~GPIO_OTYPER_OT15;						// Настройка порта PC15 на выход push-pull
+	GPIOC->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR15;
+	GPIOC->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR15;				// Настройка на высокую выходную скорость
+	GPIOC->PUPDR &= ~GPIO_PUPDR_PUPD15;						// No pull, no down (без подтяжки к плюсу или минусу питания)
+	GPIOC->MODER &= ~GPIO_MODER_MODE15;
+	GPIOC->MODER |= GPIO_MODER_MODE15_0;					// Настройка порта PC15 на выход
 }

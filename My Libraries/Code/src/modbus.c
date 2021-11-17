@@ -26,6 +26,7 @@ uint8_t ModbusData[ModbusBufSize];			// Буфер приёма данных Mod
 uint8_t ModbusSendData[ModbusBufSize];		// Буфер отправки сообщений Modbus
 
 uint8_t CurrentItemOfBuf;					// Счётчик текущего элемента буфера Modbus
+uint8_t _CurrentItemOfBuf;
 
 uint16_t CRCVal;							// Вычисленное значение контрольной суммы
 uint16_t CRCRecVal;							// Принятое значение контрольной суммы
@@ -115,6 +116,7 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 
 		if (entry == 1){
 			CurrentItemOfBuf = 0;
+			GPIOC->BSRR |= GPIO_BSRR_BR15;
 		}
 //		SendMessage(ModbusWaitingMessage);
 		if(GetMessage(ModbusReciveSymbol)){
@@ -148,9 +150,7 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 		break;
 
 	case 2:
-
-		GPIOC->BSRR |= GPIO_BSRR_BS14;
-
+		GPIOC->BSRR |= GPIO_BSRR_BS15;
 		if (entry == 1){
 //			__enable_fault_irq();
 			SysTickHandlerState = 0;					// Обработчик прерывания системного таймера в состоянии 0
@@ -175,7 +175,10 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 
 	case 3:
 
-		CRCVal = CRC16(ModbusData, CurrentItemOfBuf);						// Вычисляем CRC16
+		CRCVal = 0;
+		CRCRecVal = 0;
+
+		CRCVal = CRC16(ModbusData, CurrentItemOfBuf - 2);					// Вычисляем CRC16
 
 		uint8_t CrcHi;
 		uint8_t CrcLo;
@@ -187,11 +190,14 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 
 		if (CRCVal == CRCRecVal) {											// Сравниваем значения контрольных сумм
 			SendMessage(ModbusMessageReceived);								// Сообщение Modbus получено
+//			GPIOC->BSRR |= GPIO_BSRR_BS15;
+			_CurrentItemOfBuf = CurrentItemOfBuf;
+			state = 0;
 		}
 		else {
 			SendMessage(ModbusCRCNotOk);
 			state = 4;
-			GPIOC->BSRR |= GPIO_BSRR_BS13;
+//			GPIOC->BSRR |= GPIO_BSRR_BS14;
 
 		}
 
@@ -225,15 +231,17 @@ void ProcessMessageGenerationSlaveModbusRTUFSM (void){
 
 	case 1:
 
+
+
 		if (ModbusData[1] == 0x05){
 
 			if (ModbusData[3] == 0x50){
 
 				if (ModbusData[4] == 0xff){
 
-
-
-					for (uint8_t i = 0; i < CurrentItemOfBuf; i++){
+					GPIOC->BSRR |= GPIO_BSRR_BS14;
+					SendMessage(LedOnMsg);
+					for (uint8_t i = 0; i < _CurrentItemOfBuf - 2; i++){
 						ModbusSendData[i] = ModbusData[i];
 					}
 					stateMessageGenSlave = 2;
@@ -241,14 +249,17 @@ void ProcessMessageGenerationSlaveModbusRTUFSM (void){
 
 				if (ModbusData[4] == 0x00){
 
-					GPIOC->BSRR |= GPIO_BSRR_BS13;
+					GPIOC->BSRR |= GPIO_BSRR_BR14;
 
-					for (uint8_t i = 0; i < CurrentItemOfBuf; i++){
+					for (uint8_t i = 0; i < _CurrentItemOfBuf - 2; i++){
 						ModbusSendData[i] = ModbusData[i];
 					}
 					stateMessageGenSlave = 2;
 				}
-				break;
+
+				ModbusSendData [6] = ModbusData [7];
+				ModbusSendData [7] = ModbusData [6];
+
 
 			}
 
@@ -259,7 +270,7 @@ void ProcessMessageGenerationSlaveModbusRTUFSM (void){
 	case 2:
 
 
-		for(uint8_t i = 0; i < CurrentItemOfBuf; ){
+		for(uint8_t i = 0; i < _CurrentItemOfBuf; ){
 
 			while (!(USART->SR & USART_SR_TC));
 
