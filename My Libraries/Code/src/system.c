@@ -64,11 +64,13 @@ void InitRCC (void){
 
 void UpdateNVICActiveAndPriority (void){
 
-//	__NVIC_SetPriorityGrouping(3);									// 16 групп прерываний и 16 подгрупп
-//	__NVIC_SetPriority(IRQModbus, NVIC_EncodePriority(0, 0, 1));	// Устанавливаем Modbus прерывание в первую группу, первым приоритетом
+	__NVIC_SetPriorityGrouping(3);											// 16 групп прерываний и 16 подгрупп
+	__NVIC_SetPriority(USART6_IRQn, NVIC_EncodePriority(0, 1, 2));			// Устанавливаем Modbus прерывание в первую группу, первым приоритетом
+	__NVIC_SetPriority(TIM1_UP_TIM10_IRQn, NVIC_EncodePriority(0, 1, 3));	// Прервания 10го таймера за прерыванием Modbus
 
 	__enable_irq();
-	__NVIC_EnableIRQ(IRQModbus);									// Разрешаем прерывания от USART
+	__NVIC_EnableIRQ(USART6_IRQn);											// Разрешаем прерывания от USART
+	__NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 
 }
 

@@ -20,17 +20,19 @@ int main (void){
 	GPIOC->BSRR |= GPIO_BSRR_BR15;
 	GPIOC->BSRR |= GPIO_BSRR_BS13;
 	InitRCC();
-	InitGTimer();
 	UpdateNVICActiveAndPriority();
-	InitHardwareTimer();
+	InitGTimer();
+	InitTIM10();
 	InitMessage();
 	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
+	SendMessage(LedOnMsg);
 
 	while(1){
 
 		ProcessSlaveModbusMessageReceptionRTUFSM();
 		ProcessMessageGenerationSlaveModbusRTUFSM();
 		ProcessLedFSM();
+		ProcessGTimerFSM();
 		ProcessMessage();
 
 	}

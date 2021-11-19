@@ -11,6 +11,9 @@
 
 #define MaxGTimers 3 						// Максимальное количество глобальных таймеров
 
+#define ReceptionStopped	50
+#define ReceptionEnabled	100
+
 // Идентификаторы глобальных таймеров
 #define GTimer1	0
 #define GTimer2 1
@@ -23,8 +26,13 @@
 
 /*************************	 Code	*************************/
 
-void SysTick_Handler(void);					// Обработчик прерывания от системного таймера
-void InitHardwareTimer (void);				// Функция инициализации аппаратного таймера SysTick
+//void SysTick_Handler(void);					// Обработчик прерывания от системного таймера
+//void InitHardwareTimer (void);				// Функция инициализации аппаратного таймера SysTick
+
+void InitTIM10 (void);
+void TIM1_UP_TIM10_IRQHandler (void);
+void ProcessGTimerFSM (void);
+
 void InitGTimer(void);						// Функция инициализации глобальных таймеров
 void StartGTimer(uint8_t GTimerID);			// Функция зауска выбранного глобального таймера
 void StopGTimer(uint8_t GTimerID);			// Функция остановки выбранного глобального таймера

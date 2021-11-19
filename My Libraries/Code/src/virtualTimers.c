@@ -11,11 +11,67 @@
 uint8_t GTimerState [MaxGTimers];				// Хранение текущих состояний глобальных таймеров
 uint32_t GTimerVal	[MaxGTimers];				// Хранение текущих значений глобальных таймеров
 
-uint8_t SysTickHandlerState;					// Переменная состаяния обработчика прерывания системного таймера для работы с Modbus
+uint32_t GtimerCount;
+uint16_t MRTUcount;
+uint16_t ReceptionStatus;
+
+//uint8_t SysTickHandlerState;					// Переменная состаяния обработчика прерывания системного таймера для работы с Modbus
 
 /*************************	 Code	*************************/
 
-void InitHardwareTimer (void){
+void InitTIM10 (void){
+
+	RCC->APB2ENR |= RCC_APB2ENR_TIM10EN;
+
+	TIM10->PSC = 95;
+
+	TIM10->ARR = 500;
+
+	TIM10->DIER |= TIM_DIER_UIE;
+
+	GtimerCount = 0;
+	MRTUcount = 0;
+	ReceptionStatus = ReceptionStopped;
+
+	TIM10->CR1 |= TIM_CR1_CEN;
+
+	TIM10->EGR |= TIM_EGR_UG;
+
+}
+
+void TIM1_UP_TIM10_IRQHandler (void){
+
+	GtimerCount++;
+
+	if (ReceptionStatus == ReceptionEnabled){
+
+		if (MRTUcount >= 3){
+			SendMessage(ModbusRTUTimeOut);
+			ReceptionStatus = ReceptionStopped;
+		}
+
+	}
+
+	TIM10->SR &= ~TIM_SR_UIF;
+
+}
+
+
+void ProcessGTimerFSM (void){
+
+	for (uint8_t i = 0; i <= MaxGTimers; i++){
+
+		if (GTimerState[i] == TimerRunning){
+
+			GTimerVal[i] = GtimerCount;
+		}
+
+	}
+
+}
+
+
+/*void InitHardwareTimer (void){
 
 	SysTickHandlerState = 0;					// Обработчик прерывания системного таймера в состоянии 0
 
@@ -48,14 +104,12 @@ void SysTick_Handler(void){
 
 	}
 
-}
+}*/
 
 
 void InitGTimer(void){
 
-	uint8_t i;
-
-	for (i = 0; i < MaxGTimers; i++){
+	for (uint8_t i = 0; i < MaxGTimers; i++){
 		GTimerState[i] = TimerStopped;
 	}
 
@@ -79,7 +133,6 @@ void StopGTimer(uint8_t GTimerID){
 void PauseGTimer(uint8_t GTimerID){
 
 	if (GTimerState[GTimerID] == TimerRunning){
-
 		GTimerState[GTimerID] = TimerPaused;
 	}
 
@@ -89,7 +142,6 @@ void ReleaseGTimer(uint8_t GTimerID){
 
 	if (GTimerState[GTimerID] == TimerPaused){
 		GTimerState[GTimerID] = TimerRunning;
-
 	}
 
 }
