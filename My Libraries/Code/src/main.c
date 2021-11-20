@@ -29,10 +29,8 @@ int main (void){
 
 	while(1){
 
-		ProcessSlaveModbusMessageReceptionRTUFSM();
-		ProcessMessageGenerationSlaveModbusRTUFSM();
+		ProcessModbusSlaveFSM();
 		ProcessLedFSM();
-		ProcessGTimerFSM();
 		ProcessMessage();
 
 	}

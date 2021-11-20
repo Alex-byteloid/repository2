@@ -31,7 +31,6 @@
 
 void InitTIM10 (void);
 void TIM1_UP_TIM10_IRQHandler (void);
-void ProcessGTimerFSM (void);
 
 void InitGTimer(void);						// Функция инициализации глобальных таймеров
 void StartGTimer(uint8_t GTimerID);			// Функция зауска выбранного глобального таймера

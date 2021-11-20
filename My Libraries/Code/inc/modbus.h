@@ -15,14 +15,14 @@
 /****/
 #ifdef SixthUSART
 
-#define USART				USART6
+#define USART					USART6
 
-#define IRQModbus			USART6_IRQn
-//#define USART_IRQHandler	USART6_IRQHandler
+#define IRQModbus				USART6_IRQn
+#define ModbusUSART_IRQHandler	USART6_IRQHandler
 
-#define Gpio 				GPIOA
-#define USARTBus			APB2ENR
-#define USARTClock			RCC_APB2ENR_USART6EN
+#define Gpio 					GPIOA
+#define USARTBus				APB2ENR
+#define USARTClock				RCC_APB2ENR_USART6EN
 
 #define	TXPinPUPDR		GPIO_PUPDR_PUPD11
 #define TXPinOTYPER 	GPIO_OTYPER_OT11
@@ -66,7 +66,6 @@
 #define ModbusReciveSymbol		22					// USART-Modbus принял символ
 #define ModbusRTUTimeOut		23					// Актуально для режима RTU. Таймаут, конец сообщения
 #define ModbusOverflowError		24					// Переполнение буфера Modbus
-#define ModbusWaitingMessage	25					// Автомат в состоянии ожидания сообщения
 #define ModbusCRCONotOk			26					// Несовпадение контрольной суммы
 #define ModbusMessageReceived	27					// Сообщение получено
 **/
@@ -74,9 +73,15 @@
 /*************************	 Code	*************************/
 
 void InitModbusUSART(uint32_t Speed, uint32_t ParityControl, uint32_t StopBit, uint32_t ModbusMode);
+void InitDMAforUSART (void);
+
 void InitModbusFSM (uint32_t Baud, uint32_t Parity, uint32_t StopBit,uint32_t ModbusMode);
 void ProcessSlaveModbusMessageReceptionRTUFSM (void);
 void ProcessMessageGenerationSlaveModbusRTUFSM (void);
 void ProcessModbusSlaveFSM (void);
+
 void USART6_IRQHandler (void);
+void DMA2_Stream7_IRQHandler (void);
+
+void WriteSingleCoil (void);
 

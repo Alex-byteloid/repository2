@@ -23,7 +23,7 @@ void InitTIM10 (void){
 
 	RCC->APB2ENR |= RCC_APB2ENR_TIM10EN;
 
-	TIM10->PSC = 95;
+	TIM10->PSC = 96 - 1;
 
 	TIM10->ARR = 500;
 
@@ -41,11 +41,19 @@ void InitTIM10 (void){
 
 void TIM1_UP_TIM10_IRQHandler (void){
 
-	GtimerCount++;
+	for (uint8_t i = 0; i <= MaxGTimers; i++){
+
+		if (GTimerState[i] == TimerRunning){
+
+			GTimerVal[i]++;
+		}
+	}
 
 	if (ReceptionStatus == ReceptionEnabled){
 
-		if (MRTUcount >= 3){
+		MRTUcount++;
+
+		if (MRTUcount >= 5){
 			SendMessage(ModbusRTUTimeOut);
 			ReceptionStatus = ReceptionStopped;
 		}
@@ -53,20 +61,6 @@ void TIM1_UP_TIM10_IRQHandler (void){
 	}
 
 	TIM10->SR &= ~TIM_SR_UIF;
-
-}
-
-
-void ProcessGTimerFSM (void){
-
-	for (uint8_t i = 0; i <= MaxGTimers; i++){
-
-		if (GTimerState[i] == TimerRunning){
-
-			GTimerVal[i] = GtimerCount;
-		}
-
-	}
 
 }
 
