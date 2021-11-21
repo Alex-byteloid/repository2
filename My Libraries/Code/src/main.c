@@ -21,9 +21,11 @@ int main (void){
 	InitRCC();
 	UpdateNVICActiveAndPriority();
 	InitGTimer();
+	InitLocTimer();
 	InitTIM10();
 	InitMessage();
 	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
+	InitLedFSM();
 	SendMessage(LedOnMsg);
 
 	while(1){

@@ -217,8 +217,6 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 		else {
 			SendMessage(ModbusCRCNotOk);
 			state = 4;
-
-
 		}
 
 		break;

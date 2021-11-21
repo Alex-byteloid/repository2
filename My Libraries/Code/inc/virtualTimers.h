@@ -9,7 +9,9 @@
 
 /*************************	Define	*************************/
 
-#define MaxGTimers 3 						// Максимальное количество глобальных таймеров
+#define MaxGTimers 1 						// Максимальное количество глобальных таймеров
+
+#define MaxLocTimers	2					// Максимальное количество локальных таймеров
 
 #define ReceptionStopped	50
 #define ReceptionEnabled	100
@@ -17,7 +19,10 @@
 // Идентификаторы глобальных таймеров
 #define GTimer1	0
 #define GTimer2 1
-#define GTimer3 2
+
+// Идентификаторы локальных таймеров
+#define LocTimer1	0
+#define LocTimer2	1
 
 // Состояния таймера
 #define TimerStopped	0					// Таймер остановлен
@@ -32,10 +37,20 @@
 void InitTIM10 (void);
 void TIM1_UP_TIM10_IRQHandler (void);
 
+/* Функции глобальных таймеров */
 void InitGTimer(void);						// Функция инициализации глобальных таймеров
 void StartGTimer(uint8_t GTimerID);			// Функция зауска выбранного глобального таймера
 void StopGTimer(uint8_t GTimerID);			// Функция остановки выбранного глобального таймера
 void PauseGTimer(uint8_t GTimerID);			// Функция приостановки выбранного глобального таймера
 void ReleaseGTimer(uint8_t GTimerID);		// Функция продолжения счета выбранного глобального таймера
 uint32_t GetGTimerVal(uint8_t GTimerID);	// Функция получения значения выбранного глобального таймера
+
+/* Функции локальных таймеров */
+void InitLocTimer (void);
+void StartLocTimer (uint8_t LocTimID);
+void StopLocTimer (uint8_t LocTimID);
+void PauseLocTimer (uint8_t LocTimID);
+void ReleaseLocTimer (uint8_t LocTimID);
+uint32_t GetLocTimerVal (uint8_t LocTimID);
+
 
