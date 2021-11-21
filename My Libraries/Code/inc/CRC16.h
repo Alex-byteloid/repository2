@@ -4,11 +4,6 @@
 /************************* Includes *************************/
 
 #include "stm32f411xe.h"
-#include "system.h"
-#include "virtualTimers.h"
-#include "ledFSM.h"
-#include "messages.h"
-#include "modbus.h"
 
 /*************************	Define	*************************/
 
@@ -16,3 +11,4 @@
 
 /*************************	 Code	*************************/
 
+uint16_t CRC16(uint8_t *p, uint16_t len);
