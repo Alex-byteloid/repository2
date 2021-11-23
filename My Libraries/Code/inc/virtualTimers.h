@@ -9,9 +9,7 @@
 
 /*************************	Define	*************************/
 
-#define MaxGTimers 1 						// Максимальное количество глобальных таймеров
-
-#define MaxLocTimers	2					// Максимальное количество локальных таймеров
+#define MaxGTimers 		2 						// Максимальное количество глобальных таймеров
 
 #define ReceptionStopped	50
 #define ReceptionEnabled	100
@@ -44,13 +42,5 @@ void StopGTimer(uint8_t GTimerID);			// Функция остановки выб
 void PauseGTimer(uint8_t GTimerID);			// Функция приостановки выбранного глобального таймера
 void ReleaseGTimer(uint8_t GTimerID);		// Функция продолжения счета выбранного глобального таймера
 uint32_t GetGTimerVal(uint8_t GTimerID);	// Функция получения значения выбранного глобального таймера
-
-/* Функции локальных таймеров */
-void InitLocTimer (void);
-void StartLocTimer (uint8_t LocTimID);
-void StopLocTimer (uint8_t LocTimID);
-void PauseLocTimer (uint8_t LocTimID);
-void ReleaseLocTimer (uint8_t LocTimID);
-uint32_t GetLocTimerVal (uint8_t LocTimID);
 
 

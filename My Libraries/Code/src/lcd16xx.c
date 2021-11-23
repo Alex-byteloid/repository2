@@ -8,12 +8,14 @@
 
 /********************* Global Variables *********************/
 
-uint8_t I2CData [I2CDataBuferLenght];
+uint8_t I2C1Data [I2C1DataBuferLenght];
 
-uint8_t Status;
-uint8_t SendStates;
-uint8_t CurrentBuferElement;
-uint8_t BuferLenght;
+uint8_t i2cSendStates;
+uint8_t _i2cSendStates;
+uint8_t i2cEntry;
+
+uint8_t I2C1CurrentBuferElement;
+uint8_t I2C1BuferLenght;
 
 /*************************	 Code	*************************/
 
@@ -65,211 +67,197 @@ void InitI2C1 (void){
 
 }
 
-void InitI2C1FSM (void){
+void InitDMAI2C1 (void){
 
-	SendStates = 0;
+	RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+
+	DMA1_Stream1->CR &= ~DMA_SxCR_CHSEL;
+
+	DMA1_Stream1->PAR = (uint32_t) & I2C1->DR;
+	DMA1_Stream1->M0AR = (uint32_t) & I2C1Data[0];
+
+	DMA1_Stream1->CR &= ~DMA_SxCR_MSIZE;
+	DMA1_Stream1->CR &= ~DMA_SxCR_PSIZE;
+
+	DMA1_Stream1->CR |= DMA_SxCR_MINC;
+	DMA1_Stream1->CR &= ~DMA_SxCR_PINC;
+
+	DMA1_Stream1->CR &= ~DMA_SxCR_PL;
+	DMA1_Stream1->CR |= DMA_SxCR_DIR_0;
+	DMA1_Stream1->CR &= ~DMA_SxCR_CIRC;
+
+	DMA1_Stream1->CR |= DMA_SxCR_TCIE;
 
 }
 
-void ProcessWriteI2C1FSM (void){
+void InitI2C1FSM (void){
 
-	Status = 1;
+	InitI2C1();
+	InitDMAI2C1();
 
-	switch (SendStates){
+	i2cSendStates = 0;
+	_i2cSendStates = 0;
+}
+
+void ProcessI2CWriteFSM (void){
+
+	if ( i2cSendStates != _i2cSendStates) i2cEntry = 1; else i2cEntry = 0;
+
+	_i2cSendStates = i2cSendStates;
+
+	if (I2C1BuferLenght == 0){
+		i2cSendStates = 0;
+	}
+
+	switch (i2cSendStates){
 
 	case 0:
-
-		GPIOC->BSRR |= GPIO_BSRR_BS14;
-
-		if (GetMessage(I2CStartTransaction) && (BuferLenght != 0)){
-			SendStates = 1;
-			GPIOC->BSRR |= GPIO_BSRR_BR15;
+		if (GetMessage(I2CStartTransaction)){
+			i2cSendStates = 1;
 		}
 		break;
 
 	case 1:
-		GPIOC->BSRR |= GPIO_BSRR_BR14;
-		I2C1->CR1 |= I2C_CR1_START;						// Sending START I2C1
-		SendStates = 2;
+		if (i2cEntry == 1){
+			I2C1->CR1 |= I2C_CR1_START;						// Формируем сигнал на отправку старт бита (SB(Start condition generated))
+			StartGTimer(GTimer1);
+		}
+
+		if (GetGTimerVal(GTimer1) > 300){
+			SendMessage(I2CStartBitTimeOut);
+			StopGTimer(GTimer1);
+			i2cSendStates = 5;
+		}
+
+		if (I2C1->SR1 & I2C_SR1_SB){
+			i2cSendStates = 2;
+			StopGTimer(GTimer1);
+			(void) I2C1->SR1;								// Очищаем SB(Start condition generated) в регистре SR1
+		}
 		break;
 
 	case 2:
+		if (i2cEntry == 1){
+			DMA1_Stream1->NDTR = I2C1BuferLenght;
+			DMA1_Stream1->CR |= DMA_SxCR_EN;
+			I2C1->DR = AddrDevice;							// Отправка адреса устройства на линии I2C1 (Address sent (master mode))
+			I2C1->CR2 |= I2C_CR2_DMAEN;						// Enable DMA
+			StartGTimer(GTimer1);
+		}
 
-		StartLocTimer(LocTimer1);
+		if (GetGTimerVal(GTimer1) > 300){
+			SendMessage(I2CAddrTimeOut);
+			I2C1->CR2 &= ~I2C_CR2_DMAEN;
+			StopGTimer(GTimer1);
+			i2cSendStates = 5;
+		}
 
-			while(Status){
-
-				if (I2C1->SR1 & I2C_SR1_SB){
-					Status = 0;
-					SendStates = 3;
-				}
-
-				if (GetLocTimerVal(LocTimer1) >= 20){
-					StopLocTimer(LocTimer1);
-					Status = 0;
-					SendMessage(I2CStartBitTimeOut);
-					SendStates = 5;
-				}
-			}				// Waiting for the end of sending start
+		if (I2C1->SR1 & I2C_SR1_ADDR){						// Адрес совпал (Received address matched)
+			(void) I2C1->SR1;								// Сбрасываем бит совадения адреса (cleared by software reading SR1 register
+			(void) I2C1->SR2;								// followed reading SR2, or by hardware when PE=0)
+			GPIOC->BSRR |= GPIO_BSRR_BR15;
+			StopGTimer(GTimer1);
+			i2cSendStates = 3;
+		}
 		break;
 
 	case 3:
 
-		(void) I2C1->SR1;
-
-		I2C1->DR = AddrDevice;
-
-		StartLocTimer(LocTimer1);
-		Status = 1;
-
-			while(Status){
-
-				if (I2C1->SR1 & I2C_SR1_ADDR){
-					Status = 0;
-					SendStates = 4;
-				}
-
-				if (GetLocTimerVal(LocTimer1) >= 40){
-					Status = 0;
-					SendMessage(I2CAddrTimeOut);
-					SendStates = 5;
-				}
-			}
-
-			(void) I2C1->SR1;
-			(void) I2C1->SR2;
-
-		StopLocTimer(LocTimer1);
+		if (GetMessage(I2CDataSendComplete)){
+			i2cSendStates = 4;
+		}
 		break;
 
 	case 4:
-
-		StartLocTimer(LocTimer1);
-
-		Status = 1;
-
-		while (Status){
-
-			if (GetLocTimerVal(LocTimer1) >= 3){
-				I2C1->DR = I2CData[CurrentBuferElement];
-
-				CurrentBuferElement++;
-				Status = 0;
-			}
-
-		}
-
-		StopLocTimer(LocTimer1);
-
-
-/*		if (CurrentBuferElement == 2){
-			Status = 1;
-			StartLocTimer(LocTimer1);
-			while (Status){
-				if (GetLocTimerVal(LocTimer1) >= 12){
-					Status = 0;
-				}
-			}
-			StopLocTimer(LocTimer1);
-		}
-
-
-		StartLocTimer(LocTimer1);
-
-			while(Status){
-
-				if (I2C1->SR1 & I2C_SR1_BTF){
-					Status = 0;
-				}
-
-				if (GetLocTimerVal(LocTimer1) >= 40){
-					Status = 0;
-					SendMessage(I2CDataSendTimeOut);
-					I2C1->CR1 |= I2C_CR1_STOP;
-				break;
-				}
-			}
-*/
-
-		if (CurrentBuferElement == BuferLenght){
+		if (i2cEntry == 1){
+			DMA1_Stream1->CR &= ~DMA_SxCR_EN;
 			I2C1->CR1 |= I2C_CR1_STOP;
-			CurrentBuferElement = 0;
-			BuferLenght = 0;
-			SendStates = 0;
+//			GPIOC->BSRR |= GPIO_BSRR_BR14;
 		}
+
+		if (I2C1->SR1 & I2C_SR1_BTF){
+			i2cSendStates = 0;
+		}
+
 		break;
 
 	case 5:
-
-		if(GetMessage(I2CAddrTimeOut)){
+		if (GetMessage(I2CStartBitTimeOut)){
 			GPIOC->BSRR |= GPIO_BSRR_BS15;
-			SendStates = 0;
+			i2cSendStates = 0;
 		}
 
-		if(GetMessage(I2CStartBitTimeOut)){
+		if (GetMessage(I2CAddrTimeOut)){
 			GPIOC->BSRR |= GPIO_BSRR_BS15;
-			SendStates = 0;
-		}
-
-		if(GetMessage(I2CDataSendTimeOut)){
-			GPIOC->BSRR |= GPIO_BSRR_BS15;
-			SendStates = 0;
+			i2cSendStates = 0;
 		}
 		break;
-
 	}
 
 }
 
+/*************************	 IRQ_Handler (Обработчики прерываний)	*************************/
+
+void DMA1_Stream1_IRQHandler (void){
+
+	if (DMA1->LISR & DMA_LISR_TCIF1){
+		I2C1->CR2 &= ~I2C_CR2_DMAEN;
+		SendMessage(I2CDataSendComplete);
+		I2C1BuferLenght = 0;
+	}
+	GPIOC->BSRR |= GPIO_BSRR_BS14;
+	DMA1->LIFCR |= DMA_LIFCR_CTCIF1;
+	DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+}
+
+/*************************	 Функции для дисплея 16xx (16xx Display function)	*************************/
+
 void LCDInit (void){
 
-	I2CData[0] = 0x3C;
-	I2CData[1] = 0x38;
-	I2CData[2] = 0x3C;
-	I2CData[3] = 0x38;
-	I2CData[4] = 0x3C;
-	I2CData[5] = 0x38;
+	I2C1Data[0] = 0x3C;
+	I2C1Data[1] = 0x38;
+	I2C1Data[2] = 0x3C;
+	I2C1Data[3] = 0x38;
+	I2C1Data[4] = 0x3C;
+	I2C1Data[5] = 0x38;
 
-	I2CData[6] = 0x2C;
-	I2CData[7] = 0x28;
+	I2C1Data[6] = 0x2C;
+	I2C1Data[7] = 0x28;
 
-	I2CData[8] = 0x2C;
-	I2CData[9] = 0x28;
-	I2CData[10] = 0xCC;
-	I2CData[11] = 0xC8;
+	I2C1Data[8] = 0x2C;
+	I2C1Data[9] = 0x28;
+	I2C1Data[10] = 0xCC;
+	I2C1Data[11] = 0xC8;
 
-	I2CData[12] = 0x0C;
-	I2CData[13] = 0x08;
-	I2CData[14] = 0x8C;
-	I2CData[15] = 0x88;
+	I2C1Data[12] = 0x0C;
+	I2C1Data[13] = 0x08;
+	I2C1Data[14] = 0x8C;
+	I2C1Data[15] = 0x88;
 
-	I2CData[16] = 0x0C;
-	I2CData[17] = 0x08;
-	I2CData[18] = 0x8C;
-	I2CData[19] = 0x88;
+	I2C1Data[16] = 0x0C;
+	I2C1Data[17] = 0x08;
+	I2C1Data[18] = 0x8C;
+	I2C1Data[19] = 0x88;
 
-	I2CData[20] = 0x0C;
-	I2CData[21] = 0x08;
-	I2CData[22] = 0x6C;
-	I2CData[23] = 0x68;
+	I2C1Data[20] = 0x0C;
+	I2C1Data[21] = 0x08;
+	I2C1Data[22] = 0x6C;
+	I2C1Data[23] = 0x68;
 
-	I2CData[24] = 0x0C;
-	I2CData[25] = 0x08;
-	I2CData[26] = 0xCC;
-	I2CData[27] = 0xC8;
+	I2C1Data[24] = 0x0C;
+	I2C1Data[25] = 0x08;
+	I2C1Data[26] = 0xCC;
+	I2C1Data[27] = 0xC8;
 
-	I2CData[28] = 0x0C;
-	I2CData[29] = 0x08;
-	I2CData[30] = 0x1C;
-	I2CData[31] = 0x18;
+	I2C1Data[28] = 0x0C;
+	I2C1Data[29] = 0x08;
+	I2C1Data[30] = 0x1C;
+	I2C1Data[31] = 0x18;
 
-	CurrentBuferElement = 0;
-	BuferLenght = 30;
-
-	SendMessage(I2CStartTransaction);
+	I2C1BuferLenght = 4;
 
 }
 
 
-/*************************	 IRQ_Handler (Обработчики прерываний)	*************************/
+
 

@@ -15,9 +15,6 @@
 uint8_t GTimerState [MaxGTimers];				// Хранение текущих состояний глобальных таймеров
 uint32_t GTimerVal	[MaxGTimers];				// Хранение текущих значений глобальных таймеров
 
-uint8_t LocTimerState [MaxLocTimers];			// Хранение текущих состояний локальных таймеров
-uint32_t LocTimerVal [MaxLocTimers];			// Хранение текущих значений локальных таймеров
-
 uint16_t MRTUcount;
 uint16_t ReceptionStatus;
 
@@ -47,8 +44,6 @@ void InitTIM10 (void){
 
 void TIM1_UP_TIM10_IRQHandler (void){
 
-	if (MaxGTimers != 0){
-
 		for (uint8_t i = 0; i <= MaxGTimers; i++){
 
 				if (GTimerState[i] == TimerRunning){
@@ -56,20 +51,6 @@ void TIM1_UP_TIM10_IRQHandler (void){
 					GTimerVal[i]++;
 				}
 			}
-	}
-
-	if (MaxLocTimers != 0){
-
-		for (uint8_t i = 0; i < MaxLocTimers; i++){
-
-			if (LocTimerState[i] == TimerRunning){
-
-				LocTimerVal[i]++;
-			}
-		}
-	}
-
-
 
 	if (ReceptionStatus == ReceptionEnabled){
 
@@ -132,49 +113,3 @@ uint32_t GetGTimerVal(uint8_t GTimerID){
 	return GTimerVal[GTimerID];
 
 }
-
-
-/*************************	 Функции локальных таймеров	*************************/
-
-void InitLocTimer (void){
-
-	for (uint8_t f = 0; f < MaxLocTimers; f++){
-
-		LocTimerState [f] = TimerStopped;
-	}
-}
-
-void StartLocTimer (uint8_t LocTimID){
-
-	if (LocTimerState[LocTimID] == TimerStopped){
-
-		LocTimerVal[LocTimID] = 0;
-		LocTimerState[LocTimID] = TimerRunning;
-	}
-}
-
-void StopLocTimer (uint8_t LocTimID){
-
-	LocTimerState[LocTimID] = TimerStopped;
-}
-
-void PauseLocTimer (uint8_t LocTimID){
-
-	if (LocTimerState[LocTimID] == TimerRunning){
-
-		LocTimerState[LocTimID] = TimerPaused;
-	}
-}
-
-void ReleaseLocTimer (uint8_t LocTimID){
-
-	if (LocTimerState[LocTimID] == TimerPaused){
-		LocTimerState[LocTimID] = TimerRunning;
-	}
-}
-
-uint32_t GetLocTimerVal (uint8_t LocTimID){
-
-	return LocTimerVal[LocTimID];
-}
-

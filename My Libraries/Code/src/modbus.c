@@ -124,6 +124,7 @@ void InitDMAforUSART (void){
 	DMA2_Stream7->CR |= DMA_SxCR_MINC;
 	DMA2_Stream7->CR &= ~DMA_SxCR_PINC;
 
+	DMA2_Stream7->CR |= DMA_SxCR_PL;
 	DMA2_Stream7->CR |= DMA_SxCR_DIR_0;
 	DMA2_Stream7->CR &= ~DMA_SxCR_CIRC;
 

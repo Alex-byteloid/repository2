@@ -23,8 +23,8 @@
 
 #define I2CStartBitTimeOut		10					// Не сгенерировано старт условие для I2C
 #define I2CAddrTimeOut			11					// Проблемы с обращением по адресу I2C
-#define I2CStartTransaction		12					// Начать передачу
-#define I2CDataSendTimeOut		13					// Таймаут отправки сооьщения I2C
+#define I2CStartTransaction		14					// Начать передачу
+#define I2CDataSendComplete		13					// Сообщение оправлено
 
 /*************************	 Code	*************************/
 
