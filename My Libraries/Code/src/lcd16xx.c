@@ -1,6 +1,13 @@
 /*********************** Description ************************/
 
-
+/******************************************************************************************************
+ *												  ***											    ***
+ * Description of I2C controller ports (PCF8574AT)***		Display position DDRAM address		    ***
+ *												  ***											    ***
+ *****P7***P6***P5***P4***P3***P2***P1***P0*****  ***00*01*02*03*04*05*06*07*08*09*0A*0B*0C*0D*0E*0F***
+ *****DB7**DB6**DB5**DB4**LED**E****R/W**R/S****  ***40*41*42*43*44*45*46*47*48*49*4A*4B*4C*4D*4E*4F***
+ *												  ***		  									    ***
+ ******************************************************************************************************/
 
 /************************* Includes *************************/
 
@@ -14,8 +21,7 @@ uint8_t i2cSendStates;
 uint8_t _i2cSendStates;
 uint8_t i2cEntry;
 
-uint8_t I2C1CurrentBuferElement;
-uint8_t I2C1BuferLenght;
+uint8_t I2C1BuferSendLenght;
 
 /*************************	 Code	*************************/
 
@@ -63,6 +69,8 @@ void InitI2C1 (void){
 
 	I2C1->TRISE = 3;
 
+	I2C1->CR2 |= I2C_CR2_ITEVTEN;						// Разрешаем прерывания по событиям отравки и др. (Event interrupt enable)
+
 	I2C1->CR1 |= I2C_CR1_PE;							// I2C1 Enable
 
 }
@@ -105,92 +113,50 @@ void ProcessI2CWriteFSM (void){
 
 	_i2cSendStates = i2cSendStates;
 
-	if (I2C1BuferLenght == 0){
-		i2cSendStates = 0;
-	}
-
 	switch (i2cSendStates){
 
 	case 0:
-		if (GetMessage(I2CStartTransaction)){
-			i2cSendStates = 1;
+
+		if (i2cEntry == 1){
+			DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+			I2C1BuferSendLenght = 0;
 		}
+
+		if (I2C1BuferSendLenght == 0) {
+			i2cSendStates = 0;
+			DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+		}
+
+		if (GetMessage(I2C1StartTransaction)){
+			i2cSendStates = 1;
+			DMA1_Stream1->NDTR = I2C1BuferSendLenght;
+			DMA1_Stream1->CR |= DMA_SxCR_EN;
+		}
+
 		break;
 
 	case 1:
+
 		if (i2cEntry == 1){
-			I2C1->CR1 |= I2C_CR1_START;						// Формируем сигнал на отправку старт бита (SB(Start condition generated))
-			StartGTimer(GTimer1);
-		}
-
-		if (GetGTimerVal(GTimer1) > 300){
-			SendMessage(I2CStartBitTimeOut);
-			StopGTimer(GTimer1);
-			i2cSendStates = 5;
-		}
-
-		if (I2C1->SR1 & I2C_SR1_SB){
+			I2C1->CR1 |= I2C_CR1_START;								// Генерируем СТАРТ условие
 			i2cSendStates = 2;
-			StopGTimer(GTimer1);
-			(void) I2C1->SR1;								// Очищаем SB(Start condition generated) в регистре SR1
 		}
+
 		break;
 
 	case 2:
-		if (i2cEntry == 1){
-			DMA1_Stream1->NDTR = I2C1BuferLenght;
-			DMA1_Stream1->CR |= DMA_SxCR_EN;
-			I2C1->DR = AddrDevice;							// Отправка адреса устройства на линии I2C1 (Address sent (master mode))
-			I2C1->CR2 |= I2C_CR2_DMAEN;						// Enable DMA
-			StartGTimer(GTimer1);
-		}
 
-		if (GetGTimerVal(GTimer1) > 300){
-			SendMessage(I2CAddrTimeOut);
-			I2C1->CR2 &= ~I2C_CR2_DMAEN;
-			StopGTimer(GTimer1);
-			i2cSendStates = 5;
-		}
-
-		if (I2C1->SR1 & I2C_SR1_ADDR){						// Адрес совпал (Received address matched)
-			(void) I2C1->SR1;								// Сбрасываем бит совадения адреса (cleared by software reading SR1 register
-			(void) I2C1->SR2;								// followed reading SR2, or by hardware when PE=0)
-			GPIOC->BSRR |= GPIO_BSRR_BR15;
-			StopGTimer(GTimer1);
+		if (GetGTimerVal(GTimer1) > 1000){
 			i2cSendStates = 3;
+			StopGTimer(GTimer1);
 		}
+
 		break;
 
 	case 3:
 
-		if (GetMessage(I2CDataSendComplete)){
-			i2cSendStates = 4;
-		}
-		break;
+		GPIOC->BSRR |= GPIO_BSRR_BS15;
 
-	case 4:
-		if (i2cEntry == 1){
-			DMA1_Stream1->CR &= ~DMA_SxCR_EN;
-			I2C1->CR1 |= I2C_CR1_STOP;
-//			GPIOC->BSRR |= GPIO_BSRR_BR14;
-		}
-
-		if (I2C1->SR1 & I2C_SR1_BTF){
-			i2cSendStates = 0;
-		}
-
-		break;
-
-	case 5:
-		if (GetMessage(I2CStartBitTimeOut)){
-			GPIOC->BSRR |= GPIO_BSRR_BS15;
-			i2cSendStates = 0;
-		}
-
-		if (GetMessage(I2CAddrTimeOut)){
-			GPIOC->BSRR |= GPIO_BSRR_BS15;
-			i2cSendStates = 0;
-		}
 		break;
 	}
 
@@ -201,18 +167,34 @@ void ProcessI2CWriteFSM (void){
 void DMA1_Stream1_IRQHandler (void){
 
 	if (DMA1->LISR & DMA_LISR_TCIF1){
+		I2C1->CR1 |= I2C_CR1_STOP;
 		I2C1->CR2 &= ~I2C_CR2_DMAEN;
-		SendMessage(I2CDataSendComplete);
-		I2C1BuferLenght = 0;
+		i2cSendStates = 0;
+		DMA1->LIFCR |= DMA_LIFCR_CTCIF1;
 	}
-	GPIOC->BSRR |= GPIO_BSRR_BS14;
-	DMA1->LIFCR |= DMA_LIFCR_CTCIF1;
-	DMA1_Stream1->CR &= ~DMA_SxCR_EN;
+
+}
+
+void I2C1_EV_IRQHandler (void){
+
+	if (I2C1->SR1 & I2C_SR1_SB){
+		(void) I2C1->SR1;
+		StartGTimer(GTimer1);
+		I2C1->DR = AddrDevice;
+		I2C1->CR2 |= I2C_CR2_DMAEN;
+	}
+
+	if (I2C1->SR1 & I2C_SR1_ADDR){
+		(void) I2C1->SR1;
+		(void) I2C1->SR2;
+		StopGTimer(GTimer1);
+	}
+
 }
 
 /*************************	 Функции для дисплея 16xx (16xx Display function)	*************************/
 
-void LCDInit (void){
+void InitLCD (void){
 
 	I2C1Data[0] = 0x3C;
 	I2C1Data[1] = 0x38;
@@ -254,10 +236,219 @@ void LCDInit (void){
 	I2C1Data[30] = 0x1C;
 	I2C1Data[31] = 0x18;
 
-	I2C1BuferLenght = 4;
+	I2C1Data[32] = 0x4C;
+	I2C1Data[33] = 0x48;
+	I2C1Data[34] = 0xC;
+	I2C1Data[35] = 0x8;
+
+	I2C1BuferSendLenght = 6;
+	SendMessage(I2C1StartTransaction);
+}
+
+uint8_t WriteCommand (uint8_t Data, uint8_t BuferLeftBorder){
+
+	uint8_t Up = Data & 0xF0;
+	uint8_t Low = (Data<<4) & 0xF0;
+
+	uint8_t Send;
+
+	Send = (Up | 0x0C);
+	I2C1Data[BuferLeftBorder] = Send;
+	Send = (Up | 0x08);
+	I2C1Data[BuferLeftBorder + 1] = Send;
+
+	Send = (Low | 0x0C);
+	I2C1Data[BuferLeftBorder + 2] = Send;
+	Send = (Low | 0x08);
+	I2C1Data[BuferLeftBorder + 3] = Send;
+
+	return (BuferLeftBorder + 3);
 
 }
 
+void WriteDataToLCD (uint8_t X,uint8_t Y, char *Str){
 
+	for (uint8_t i = 0; i < I2C1DataBuferLenght; i++){
+		I2C1Data[i] = 0;
+	}
 
+	uint8_t BuferRightBorder = 0;
 
+	if (X == 1){
+
+			switch (Y){
+
+			case 1:
+				BuferRightBorder = WriteCommand(0x80, 0);
+				break;
+
+			case 2:
+				BuferRightBorder = WriteCommand(0x81, 0);
+				break;
+
+			case 3:
+				BuferRightBorder = WriteCommand(0x82, 0);
+				break;
+
+			case 4:
+				BuferRightBorder = WriteCommand(0x83, 0);
+				break;
+
+			case 5:
+				BuferRightBorder = WriteCommand(0x84, 0);
+				break;
+
+			case 6:
+				BuferRightBorder = WriteCommand(0x85, 0);
+				break;
+
+			case 7:
+				BuferRightBorder = WriteCommand(0x86, 0);
+				break;
+
+			case 8:
+				BuferRightBorder = WriteCommand(0x87, 0);
+				break;
+
+			case 9:
+				BuferRightBorder = WriteCommand(0x88, 0);
+				break;
+
+			case 10:
+				BuferRightBorder = WriteCommand(0x89, 0);
+				break;
+
+			case 11:
+				BuferRightBorder = WriteCommand(0x8A, 0);
+				break;
+
+			case 12:
+				BuferRightBorder = WriteCommand(0x8B, 0);
+				break;
+
+			case 13:
+				BuferRightBorder = WriteCommand(0x8C, 0);
+				break;
+
+			case 14:
+				BuferRightBorder = WriteCommand(0x8D, 0);
+				break;
+
+			case 15:
+				BuferRightBorder = WriteCommand(0x8E, 0);
+				break;
+
+			case 16:
+				BuferRightBorder = WriteCommand(0x8F, 0);
+				break;
+			}
+
+		}
+
+		if (X == 2){
+
+				switch (Y){
+
+				case 1:
+					BuferRightBorder = WriteCommand(0xC0, 0);
+					break;
+
+				case 2:
+					BuferRightBorder = WriteCommand(0xC1, 0);
+					break;
+
+				case 3:
+					BuferRightBorder = WriteCommand(0xC2, 0);
+					break;
+
+				case 4:
+					BuferRightBorder = WriteCommand(0xC3, 0);
+					break;
+
+				case 5:
+					BuferRightBorder = WriteCommand(0xC4, 0);
+					break;
+
+				case 6:
+					BuferRightBorder = WriteCommand(0xC5, 0);
+					break;
+
+				case 7:
+					BuferRightBorder = WriteCommand(0xC6, 0);
+					break;
+
+				case 8:
+					BuferRightBorder = WriteCommand(0xC7, 0);
+					break;
+
+				case 9:
+					BuferRightBorder = WriteCommand(0xC8, 0);
+					break;
+
+				case 10:
+					BuferRightBorder = WriteCommand(0xC9, 0);
+					break;
+
+				case 11:
+					BuferRightBorder = WriteCommand(0xCA, 0);
+					break;
+
+				case 12:
+					BuferRightBorder = WriteCommand(0xCB, 0);
+					break;
+
+				case 13:
+					BuferRightBorder = WriteCommand(0xCC, 0);
+					break;
+
+				case 14:
+					BuferRightBorder = WriteCommand(0xCD, 0);
+					break;
+
+				case 15:
+					BuferRightBorder = WriteCommand(0xCE, 0);
+					break;
+
+				case 16:
+					BuferRightBorder = WriteCommand(0xCF, 0);
+					break;
+				}
+
+			}
+
+		while (*Str){
+
+			uint8_t Walue = (uint8_t)*Str;
+			uint8_t UpByte = Walue & 0xF0;
+			uint8_t LowByte = (Walue<<4) & 0xF0;
+
+			uint8_t WriteByte;
+
+			WriteByte = (UpByte | 0x0D);
+			I2C1Data[BuferRightBorder] = WriteByte;
+			WriteByte = (UpByte | 0x09);
+			I2C1Data[BuferRightBorder + 1] = WriteByte;
+
+			WriteByte = (LowByte | 0x0D);
+			I2C1Data[BuferRightBorder + 2] = WriteByte;
+			WriteByte = (LowByte | 0x09);
+			I2C1Data[BuferRightBorder + 3] = WriteByte;
+
+			BuferRightBorder = BuferRightBorder + 3;
+			Str++;
+
+		}
+
+		I2C1BuferSendLenght = BuferRightBorder;
+
+}
+
+void ClearGram (void){
+
+	I2C1Data[0] = 0x0C;
+	I2C1Data[1] = 0x08;
+	I2C1Data[2] = 0x1C;
+	I2C1Data[3] = 0x18;
+
+	I2C1BuferSendLenght = 4;
+}

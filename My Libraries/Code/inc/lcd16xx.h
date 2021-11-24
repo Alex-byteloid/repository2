@@ -15,22 +15,26 @@
 
 #define AddrDevice			0x4E
 
-#define I2C1DataBuferLenght	28
+#define I2C1DataBuferLenght	100
+
 
 /************************* Messages *************************/
 /*
- *
- * #define I2CStartBitTimeOut		10					// Не сгенерировано старт условие для I2C
- * #define I2CAddrTimeOut			11					// Проблемы с обращением по адресу I2C
  * #define I2CStartTransaction		12					// Начать передачу
- * #define I2CDataSendComplete		13					// Сообщение оправлено
  * */
 
 /*************************	 Code	*************************/
 
 void InitI2C1 (void);
 void InitDMAI2C1 (void);
+
 void InitI2C1FSM (void);
 void ProcessI2CWriteFSM (void);
-void LCDInit (void);
 void DMA1_Stream1_IRQHandler (void);
+void I2C1_EV_IRQHandler (void);
+
+void InitLCD (void);
+uint8_t WriteCommand (uint8_t Data, uint8_t BuferLeftBorder);
+void WriteDataToLCD (uint8_t X,uint8_t Y, char *Str);
+void ClearGram (void);
+

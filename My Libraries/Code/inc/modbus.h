@@ -7,6 +7,7 @@
 #include "messages.h"
 #include "virtualTimers.h"
 #include "CRC16.h"
+#include "lcd16xx.h"
 
 /*************************	Define	*************************/
 

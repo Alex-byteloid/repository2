@@ -21,10 +21,7 @@
 #define ModbusCRCNotOk			26					// Несовпадение контрольной суммы
 #define ModbusMessageReceived	27					// Сообщение получено
 
-#define I2CStartBitTimeOut		10					// Не сгенерировано старт условие для I2C
-#define I2CAddrTimeOut			11					// Проблемы с обращением по адресу I2C
-#define I2CStartTransaction		14					// Начать передачу
-#define I2CDataSendComplete		13					// Сообщение оправлено
+#define I2C1StartTransaction	14					// Начать передачу
 
 /*************************	 Code	*************************/
 
