@@ -21,7 +21,8 @@
 #define ModbusCRCNotOk			26					// Несовпадение контрольной суммы
 #define ModbusMessageReceived	27					// Сообщение получено
 
-#define I2C1StartTransaction	14					// Начать передачу
+#define I2C1StartTransaction	10					// Начать передачу
+#define LcdStartInit			11					// Старт инициализации дисплея
 
 /*************************	 Code	*************************/
 

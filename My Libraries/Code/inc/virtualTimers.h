@@ -9,7 +9,7 @@
 
 /*************************	Define	*************************/
 
-#define MaxGTimers 		2 						// Максимальное количество глобальных таймеров
+#define MaxGTimers 		3 						// Максимальное количество глобальных таймеров
 
 #define ReceptionStopped	50
 #define ReceptionEnabled	100
@@ -17,6 +17,7 @@
 // Идентификаторы глобальных таймеров
 #define GTimer1	0
 #define GTimer2 1
+#define GTimer3 2
 
 // Идентификаторы локальных таймеров
 #define LocTimer1	0

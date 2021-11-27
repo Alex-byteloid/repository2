@@ -33,8 +33,5 @@ void ProcessI2CWriteFSM (void);
 void DMA1_Stream1_IRQHandler (void);
 void I2C1_EV_IRQHandler (void);
 
-void InitLCD (void);
-uint8_t WriteCommand (uint8_t Data, uint8_t BuferLeftBorder);
-void WriteDataToLCD (uint8_t X,uint8_t Y, char *Str);
-void ClearGram (void);
+
 

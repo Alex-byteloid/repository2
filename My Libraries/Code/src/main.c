@@ -27,8 +27,7 @@ int main (void){
 	InitLedFSM();
 	SendMessage(LedOnMsg);
 
-	InitI2C1FSM();
-	InitLCD();
+
 
 	while(1){
 

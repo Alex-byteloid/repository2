@@ -15,6 +15,18 @@
 
 /********************* Global Variables *********************/
 
+const uint8_t BuferLCDInit[] = 	{0x3C, 0x38, 											/*	 0 - 1	*/
+								0x3C, 0x38,												/* 	 2 - 3 	*/
+								0x2C, 0x28,												/*	 4 - 5 	*/
+								0x2C, 0x28, 0xCC, 0xC8,									/*	 6 - 9 */
+								0x0C, 0x08, 0x8C, 0x88, 0x0C, 0x08, 0x8C, 0x88,			/* 	10 - 17 */
+								0x0C, 0x08, 0x6C, 0x68, 0x0C, 0x08, 0xCC, 0xC8,			/* 	18 - 25 */
+								0x0C, 0x08, 0x1C, 0x18};								/* 	26 - 29 */
+
+
+const uint8_t DDRAMLCD1602 [2][16] = {{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F},
+						  	  	   	  {0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F}};
+
 uint8_t I2C1Data [I2C1DataBuferLenght];
 
 uint8_t i2cSendStates;
@@ -22,6 +34,10 @@ uint8_t _i2cSendStates;
 uint8_t i2cEntry;
 
 uint8_t I2C1BuferSendLenght;
+
+uint8_t lcdStates;
+uint8_t _lcdStates;
+uint8_t lcdEntry;
 
 /*************************	 Code	*************************/
 
@@ -81,8 +97,9 @@ void InitDMAI2C1 (void){
 
 	DMA1_Stream1->CR &= ~DMA_SxCR_CHSEL;
 
-	DMA1_Stream1->PAR = (uint32_t) & I2C1->DR;
 	DMA1_Stream1->M0AR = (uint32_t) & I2C1Data[0];
+	DMA1_Stream1->PAR = (uint32_t) & I2C1->DR;
+
 
 	DMA1_Stream1->CR &= ~DMA_SxCR_MSIZE;
 	DMA1_Stream1->CR &= ~DMA_SxCR_PSIZE;
@@ -194,261 +211,4 @@ void I2C1_EV_IRQHandler (void){
 
 /*************************	 Функции для дисплея 16xx (16xx Display function)	*************************/
 
-void InitLCD (void){
 
-	I2C1Data[0] = 0x3C;
-	I2C1Data[1] = 0x38;
-	I2C1Data[2] = 0x3C;
-	I2C1Data[3] = 0x38;
-	I2C1Data[4] = 0x3C;
-	I2C1Data[5] = 0x38;
-
-	I2C1Data[6] = 0x2C;
-	I2C1Data[7] = 0x28;
-
-	I2C1Data[8] = 0x2C;
-	I2C1Data[9] = 0x28;
-	I2C1Data[10] = 0xCC;
-	I2C1Data[11] = 0xC8;
-
-	I2C1Data[12] = 0x0C;
-	I2C1Data[13] = 0x08;
-	I2C1Data[14] = 0x8C;
-	I2C1Data[15] = 0x88;
-
-	I2C1Data[16] = 0x0C;
-	I2C1Data[17] = 0x08;
-	I2C1Data[18] = 0x8C;
-	I2C1Data[19] = 0x88;
-
-	I2C1Data[20] = 0x0C;
-	I2C1Data[21] = 0x08;
-	I2C1Data[22] = 0x6C;
-	I2C1Data[23] = 0x68;
-
-	I2C1Data[24] = 0x0C;
-	I2C1Data[25] = 0x08;
-	I2C1Data[26] = 0xCC;
-	I2C1Data[27] = 0xC8;
-
-	I2C1Data[28] = 0x0C;
-	I2C1Data[29] = 0x08;
-	I2C1Data[30] = 0x1C;
-	I2C1Data[31] = 0x18;
-
-	I2C1Data[32] = 0x4C;
-	I2C1Data[33] = 0x48;
-	I2C1Data[34] = 0xC;
-	I2C1Data[35] = 0x8;
-
-	I2C1BuferSendLenght = 6;
-	SendMessage(I2C1StartTransaction);
-}
-
-uint8_t WriteCommand (uint8_t Data, uint8_t BuferLeftBorder){
-
-	uint8_t Up = Data & 0xF0;
-	uint8_t Low = (Data<<4) & 0xF0;
-
-	uint8_t Send;
-
-	Send = (Up | 0x0C);
-	I2C1Data[BuferLeftBorder] = Send;
-	Send = (Up | 0x08);
-	I2C1Data[BuferLeftBorder + 1] = Send;
-
-	Send = (Low | 0x0C);
-	I2C1Data[BuferLeftBorder + 2] = Send;
-	Send = (Low | 0x08);
-	I2C1Data[BuferLeftBorder + 3] = Send;
-
-	return (BuferLeftBorder + 3);
-
-}
-
-void WriteDataToLCD (uint8_t X,uint8_t Y, char *Str){
-
-	for (uint8_t i = 0; i < I2C1DataBuferLenght; i++){
-		I2C1Data[i] = 0;
-	}
-
-	uint8_t BuferRightBorder = 0;
-
-	if (X == 1){
-
-			switch (Y){
-
-			case 1:
-				BuferRightBorder = WriteCommand(0x80, 0);
-				break;
-
-			case 2:
-				BuferRightBorder = WriteCommand(0x81, 0);
-				break;
-
-			case 3:
-				BuferRightBorder = WriteCommand(0x82, 0);
-				break;
-
-			case 4:
-				BuferRightBorder = WriteCommand(0x83, 0);
-				break;
-
-			case 5:
-				BuferRightBorder = WriteCommand(0x84, 0);
-				break;
-
-			case 6:
-				BuferRightBorder = WriteCommand(0x85, 0);
-				break;
-
-			case 7:
-				BuferRightBorder = WriteCommand(0x86, 0);
-				break;
-
-			case 8:
-				BuferRightBorder = WriteCommand(0x87, 0);
-				break;
-
-			case 9:
-				BuferRightBorder = WriteCommand(0x88, 0);
-				break;
-
-			case 10:
-				BuferRightBorder = WriteCommand(0x89, 0);
-				break;
-
-			case 11:
-				BuferRightBorder = WriteCommand(0x8A, 0);
-				break;
-
-			case 12:
-				BuferRightBorder = WriteCommand(0x8B, 0);
-				break;
-
-			case 13:
-				BuferRightBorder = WriteCommand(0x8C, 0);
-				break;
-
-			case 14:
-				BuferRightBorder = WriteCommand(0x8D, 0);
-				break;
-
-			case 15:
-				BuferRightBorder = WriteCommand(0x8E, 0);
-				break;
-
-			case 16:
-				BuferRightBorder = WriteCommand(0x8F, 0);
-				break;
-			}
-
-		}
-
-		if (X == 2){
-
-				switch (Y){
-
-				case 1:
-					BuferRightBorder = WriteCommand(0xC0, 0);
-					break;
-
-				case 2:
-					BuferRightBorder = WriteCommand(0xC1, 0);
-					break;
-
-				case 3:
-					BuferRightBorder = WriteCommand(0xC2, 0);
-					break;
-
-				case 4:
-					BuferRightBorder = WriteCommand(0xC3, 0);
-					break;
-
-				case 5:
-					BuferRightBorder = WriteCommand(0xC4, 0);
-					break;
-
-				case 6:
-					BuferRightBorder = WriteCommand(0xC5, 0);
-					break;
-
-				case 7:
-					BuferRightBorder = WriteCommand(0xC6, 0);
-					break;
-
-				case 8:
-					BuferRightBorder = WriteCommand(0xC7, 0);
-					break;
-
-				case 9:
-					BuferRightBorder = WriteCommand(0xC8, 0);
-					break;
-
-				case 10:
-					BuferRightBorder = WriteCommand(0xC9, 0);
-					break;
-
-				case 11:
-					BuferRightBorder = WriteCommand(0xCA, 0);
-					break;
-
-				case 12:
-					BuferRightBorder = WriteCommand(0xCB, 0);
-					break;
-
-				case 13:
-					BuferRightBorder = WriteCommand(0xCC, 0);
-					break;
-
-				case 14:
-					BuferRightBorder = WriteCommand(0xCD, 0);
-					break;
-
-				case 15:
-					BuferRightBorder = WriteCommand(0xCE, 0);
-					break;
-
-				case 16:
-					BuferRightBorder = WriteCommand(0xCF, 0);
-					break;
-				}
-
-			}
-
-		while (*Str){
-
-			uint8_t Walue = (uint8_t)*Str;
-			uint8_t UpByte = Walue & 0xF0;
-			uint8_t LowByte = (Walue<<4) & 0xF0;
-
-			uint8_t WriteByte;
-
-			WriteByte = (UpByte | 0x0D);
-			I2C1Data[BuferRightBorder] = WriteByte;
-			WriteByte = (UpByte | 0x09);
-			I2C1Data[BuferRightBorder + 1] = WriteByte;
-
-			WriteByte = (LowByte | 0x0D);
-			I2C1Data[BuferRightBorder + 2] = WriteByte;
-			WriteByte = (LowByte | 0x09);
-			I2C1Data[BuferRightBorder + 3] = WriteByte;
-
-			BuferRightBorder = BuferRightBorder + 3;
-			Str++;
-
-		}
-
-		I2C1BuferSendLenght = BuferRightBorder;
-
-}
-
-void ClearGram (void){
-
-	I2C1Data[0] = 0x0C;
-	I2C1Data[1] = 0x08;
-	I2C1Data[2] = 0x1C;
-	I2C1Data[3] = 0x18;
-
-	I2C1BuferSendLenght = 4;
-}
