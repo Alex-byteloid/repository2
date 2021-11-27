@@ -1,5 +1,10 @@
 /*********************** Description ************************/
 
+/*ВНИМАНИЕ! Для отправки по I2C данных через КА "ProcessI2CWriteFSM" нужно задавать значение переменных
+ * "I2C1NumberOfTransaction" - это количество передач
+ * "I2C1LeftBorder" - это стартовая граница отправки сообщения (то, откуда начинается отправка сообщения длиной "I2C1NumberOfTransaction"символов
+ * */
+
 /******************************************************************************************************
  *												  ***											    ***
  * Description of I2C controller ports (PCF8574AT)***		Display position DDRAM address		    ***
@@ -33,11 +38,10 @@ uint8_t i2cSendStates;
 uint8_t _i2cSendStates;
 uint8_t i2cEntry;
 
-uint8_t I2C1BuferSendLenght;
+uint8_t I2C1NumberOfTransaction;						//	количество передач по I2C
 
-uint8_t lcdStates;
-uint8_t _lcdStates;
-uint8_t lcdEntry;
+uint8_t I2C1LeftBorder;									//	стартовая граница отправки сообщения
+
 
 /*************************	 Code	*************************/
 
@@ -97,7 +101,6 @@ void InitDMAI2C1 (void){
 
 	DMA1_Stream1->CR &= ~DMA_SxCR_CHSEL;
 
-	DMA1_Stream1->M0AR = (uint32_t) & I2C1Data[0];
 	DMA1_Stream1->PAR = (uint32_t) & I2C1->DR;
 
 
@@ -136,17 +139,18 @@ void ProcessI2CWriteFSM (void){
 
 		if (i2cEntry == 1){
 			DMA1_Stream1->CR &= ~DMA_SxCR_EN;
-			I2C1BuferSendLenght = 0;
+			I2C1NumberOfTransaction = 0;
 		}
 
-		if (I2C1BuferSendLenght == 0) {
+		if (I2c1NumberOfTransaction == 0) {
 			i2cSendStates = 0;
 			DMA1_Stream1->CR &= ~DMA_SxCR_EN;
 		}
 
 		if (GetMessage(I2C1StartTransaction)){
 			i2cSendStates = 1;
-			DMA1_Stream1->NDTR = I2C1BuferSendLenght;
+			DMA1_Stream1->M0AR = (uint32_t) & I2C1Data[I2C1LeftBorder];
+			DMA1_Stream1->NDTR = I2C1NumberOfTransaction;
 			DMA1_Stream1->CR |= DMA_SxCR_EN;
 		}
 
