@@ -15,16 +15,20 @@ Allocating common symbols
 Common symbol       size              file
 
 entry               0x1               ./Code/src/modbus.o
+I2C1LeftBorder      0x1               ./Code/src/lcd16xx.o
 MRTUcount           0x2               ./Code/src/virtualTimers.o
 _stateMessageGenSlave
                     0x1               ./Code/src/modbus.o
 i2cEntry            0x1               ./Code/src/lcd16xx.o
+I2C1NumberOfTransaction
+                    0x1               ./Code/src/lcd16xx.o
 statePis            0x1               ./Code/src/ledFSM.o
 _state              0x1               ./Code/src/modbus.o
 CRCVal              0x2               ./Code/src/modbus.o
 state               0x1               ./Code/src/modbus.o
 stateMessageGenSlave
                     0x1               ./Code/src/modbus.o
+Schet               0x1               ./Code/src/lcd16xx.o
 GTimerVal           0xc               ./Code/src/virtualTimers.o
 _lcdStates          0x1               ./Code/src/lcd16xx.o
 _CurrentItemOfBuf   0x1               ./Code/src/modbus.o
@@ -38,8 +42,6 @@ GTimerState         0x3               ./Code/src/virtualTimers.o
 lcdStates           0x1               ./Code/src/lcd16xx.o
 entryPis1           0x1               ./Code/src/ledFSM.o
 i2cSendStates       0x1               ./Code/src/lcd16xx.o
-I2C1BuferSendLenght
-                    0x1               ./Code/src/lcd16xx.o
 lcdEntry            0x1               ./Code/src/lcd16xx.o
 ReceptionStatus     0x2               ./Code/src/virtualTimers.o
 Messages            0x1e              ./Code/src/messages.o
@@ -132,16 +134,8 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ./Code/src/lcd16xx.o
  .data          0x0000000000000000        0x0 ./Code/src/lcd16xx.o
  .bss           0x0000000000000000        0x0 ./Code/src/lcd16xx.o
- .rodata.BuferLCDInit
-                0x0000000000000000       0x1e ./Code/src/lcd16xx.o
  .rodata.DDRAMLCD1602
                 0x0000000000000000       0x20 ./Code/src/lcd16xx.o
- .text.InitI2C1
-                0x0000000000000000      0x18c ./Code/src/lcd16xx.o
- .text.InitDMAI2C1
-                0x0000000000000000       0xa0 ./Code/src/lcd16xx.o
- .text.InitI2C1FSM
-                0x0000000000000000       0x24 ./Code/src/lcd16xx.o
  .debug_macro   0x0000000000000000      0xa8a ./Code/src/lcd16xx.o
  .debug_macro   0x0000000000000000       0x28 ./Code/src/lcd16xx.o
  .debug_macro   0x0000000000000000       0x22 ./Code/src/lcd16xx.o
@@ -481,7 +475,7 @@ LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x0000000008000000                g_pfnVectors
                 0x0000000008000198                . = ALIGN (0x4)
 
-.text           0x0000000008000198     0x1368
+.text           0x0000000008000198     0x17d4
                 0x0000000008000198                . = ALIGN (0x4)
  *(.text)
  .text          0x0000000008000198       0x40 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
@@ -494,240 +488,259 @@ LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x0000000008000234                SystemCoreClockUpdate
  .text.CRC16    0x0000000008000334       0x6c ./Code/src/CRC16.o
                 0x0000000008000334                CRC16
+ .text.InitI2C1
+                0x00000000080003a0      0x18c ./Code/src/lcd16xx.o
+                0x00000000080003a0                InitI2C1
+ .text.InitDMAI2C1
+                0x000000000800052c       0x98 ./Code/src/lcd16xx.o
+                0x000000000800052c                InitDMAI2C1
+ .text.InitI2C1FSM
+                0x00000000080005c4       0x24 ./Code/src/lcd16xx.o
+                0x00000000080005c4                InitI2C1FSM
  .text.ProcessI2CWriteFSM
-                0x00000000080003a0      0x110 ./Code/src/lcd16xx.o
-                0x00000000080003a0                ProcessI2CWriteFSM
+                0x00000000080005e8      0x12c ./Code/src/lcd16xx.o
+                0x00000000080005e8                ProcessI2CWriteFSM
  .text.DMA1_Stream1_IRQHandler
-                0x00000000080004b0       0x50 ./Code/src/lcd16xx.o
-                0x00000000080004b0                DMA1_Stream1_IRQHandler
+                0x0000000008000714       0x50 ./Code/src/lcd16xx.o
+                0x0000000008000714                DMA1_Stream1_IRQHandler
  .text.I2C1_EV_IRQHandler
-                0x0000000008000500       0x50 ./Code/src/lcd16xx.o
-                0x0000000008000500                I2C1_EV_IRQHandler
+                0x0000000008000764       0x50 ./Code/src/lcd16xx.o
+                0x0000000008000764                I2C1_EV_IRQHandler
+ .text.InitLcdFSM
+                0x00000000080007b4       0x34 ./Code/src/lcd16xx.o
+                0x00000000080007b4                InitLcdFSM
+ .text.ProcessLcdFSM
+                0x00000000080007e8      0x1c0 ./Code/src/lcd16xx.o
+                0x00000000080007e8                ProcessLcdFSM
  .text.InitLedFSM
-                0x0000000008000550       0x2c ./Code/src/ledFSM.o
-                0x0000000008000550                InitLedFSM
+                0x00000000080009a8       0x2c ./Code/src/ledFSM.o
+                0x00000000080009a8                InitLedFSM
  .text.ProcessLedFSM
-                0x000000000800057c       0xdc ./Code/src/ledFSM.o
-                0x000000000800057c                ProcessLedFSM
- .text.main     0x0000000008000658       0x74 ./Code/src/main.o
-                0x0000000008000658                main
+                0x00000000080009d4       0xdc ./Code/src/ledFSM.o
+                0x00000000080009d4                ProcessLedFSM
+ .text.main     0x0000000008000ab0       0x88 ./Code/src/main.o
+                0x0000000008000ab0                main
  .text.InitMessage
-                0x00000000080006cc       0x34 ./Code/src/messages.o
-                0x00000000080006cc                InitMessage
+                0x0000000008000b38       0x34 ./Code/src/messages.o
+                0x0000000008000b38                InitMessage
  .text.SendMessage
-                0x0000000008000700       0x20 ./Code/src/messages.o
-                0x0000000008000700                SendMessage
+                0x0000000008000b6c       0x2c ./Code/src/messages.o
+                0x0000000008000b6c                SendMessage
  .text.ProcessMessage
-                0x0000000008000720       0x54 ./Code/src/messages.o
-                0x0000000008000720                ProcessMessage
+                0x0000000008000b98       0x54 ./Code/src/messages.o
+                0x0000000008000b98                ProcessMessage
  .text.GetMessage
-                0x0000000008000774       0x34 ./Code/src/messages.o
-                0x0000000008000774                GetMessage
+                0x0000000008000bec       0x34 ./Code/src/messages.o
+                0x0000000008000bec                GetMessage
  .text.InitModbusUSART
-                0x00000000080007a8      0x17c ./Code/src/modbus.o
-                0x00000000080007a8                InitModbusUSART
+                0x0000000008000c20      0x17c ./Code/src/modbus.o
+                0x0000000008000c20                InitModbusUSART
  .text.InitDMAforUSART
-                0x0000000008000924       0xa0 ./Code/src/modbus.o
-                0x0000000008000924                InitDMAforUSART
+                0x0000000008000d9c       0xa0 ./Code/src/modbus.o
+                0x0000000008000d9c                InitDMAforUSART
  .text.InitModbusFSM
-                0x00000000080009c4       0x70 ./Code/src/modbus.o
-                0x00000000080009c4                InitModbusFSM
+                0x0000000008000e3c       0x70 ./Code/src/modbus.o
+                0x0000000008000e3c                InitModbusFSM
  .text.ProcessSlaveModbusMessageReceptionRTUFSM
-                0x0000000008000a34      0x190 ./Code/src/modbus.o
-                0x0000000008000a34                ProcessSlaveModbusMessageReceptionRTUFSM
+                0x0000000008000eac      0x190 ./Code/src/modbus.o
+                0x0000000008000eac                ProcessSlaveModbusMessageReceptionRTUFSM
  .text.ProcessMessageGenerationSlaveModbusRTUFSM
-                0x0000000008000bc4      0x15c ./Code/src/modbus.o
-                0x0000000008000bc4                ProcessMessageGenerationSlaveModbusRTUFSM
+                0x000000000800103c      0x15c ./Code/src/modbus.o
+                0x000000000800103c                ProcessMessageGenerationSlaveModbusRTUFSM
  .text.ProcessModbusSlaveFSM
-                0x0000000008000d20       0x10 ./Code/src/modbus.o
-                0x0000000008000d20                ProcessModbusSlaveFSM
+                0x0000000008001198       0x10 ./Code/src/modbus.o
+                0x0000000008001198                ProcessModbusSlaveFSM
  .text.USART6_IRQHandler
-                0x0000000008000d30       0x6c ./Code/src/modbus.o
-                0x0000000008000d30                USART6_IRQHandler
+                0x00000000080011a8       0x6c ./Code/src/modbus.o
+                0x00000000080011a8                USART6_IRQHandler
  .text.DMA2_Stream7_IRQHandler
-                0x0000000008000d9c       0x34 ./Code/src/modbus.o
-                0x0000000008000d9c                DMA2_Stream7_IRQHandler
+                0x0000000008001214       0x34 ./Code/src/modbus.o
+                0x0000000008001214                DMA2_Stream7_IRQHandler
  .text.WriteSingleCoil
-                0x0000000008000dd0       0xc4 ./Code/src/modbus.o
-                0x0000000008000dd0                WriteSingleCoil
+                0x0000000008001248       0xb8 ./Code/src/modbus.o
+                0x0000000008001248                WriteSingleCoil
  .text.__NVIC_SetPriorityGrouping
-                0x0000000008000e94       0x48 ./Code/src/system.o
+                0x0000000008001300       0x48 ./Code/src/system.o
  .text.__NVIC_EnableIRQ
-                0x0000000008000edc       0x38 ./Code/src/system.o
+                0x0000000008001348       0x38 ./Code/src/system.o
  .text.__NVIC_SetPriority
-                0x0000000008000f14       0x54 ./Code/src/system.o
+                0x0000000008001380       0x54 ./Code/src/system.o
  .text.NVIC_EncodePriority
-                0x0000000008000f68       0x64 ./Code/src/system.o
- .text.InitRCC  0x0000000008000fcc      0x14c ./Code/src/system.o
-                0x0000000008000fcc                InitRCC
+                0x00000000080013d4       0x64 ./Code/src/system.o
+ .text.InitRCC  0x0000000008001438      0x14c ./Code/src/system.o
+                0x0000000008001438                InitRCC
  .text.UpdateNVICActiveAndPriority
-                0x0000000008001118       0x90 ./Code/src/system.o
-                0x0000000008001118                UpdateNVICActiveAndPriority
+                0x0000000008001584       0x90 ./Code/src/system.o
+                0x0000000008001584                UpdateNVICActiveAndPriority
  .text.InitGPIO
-                0x00000000080011a8      0x110 ./Code/src/system.o
-                0x00000000080011a8                InitGPIO
+                0x0000000008001614      0x110 ./Code/src/system.o
+                0x0000000008001614                InitGPIO
  .text.InitTIM10
-                0x00000000080012b8       0x68 ./Code/src/virtualTimers.o
-                0x00000000080012b8                InitTIM10
+                0x0000000008001724       0x68 ./Code/src/virtualTimers.o
+                0x0000000008001724                InitTIM10
  .text.TIM1_UP_TIM10_IRQHandler
-                0x0000000008001320       0x84 ./Code/src/virtualTimers.o
-                0x0000000008001320                TIM1_UP_TIM10_IRQHandler
+                0x000000000800178c       0x84 ./Code/src/virtualTimers.o
+                0x000000000800178c                TIM1_UP_TIM10_IRQHandler
  .text.InitGTimer
-                0x00000000080013a4       0x30 ./Code/src/virtualTimers.o
-                0x00000000080013a4                InitGTimer
+                0x0000000008001810       0x30 ./Code/src/virtualTimers.o
+                0x0000000008001810                InitGTimer
  .text.StartGTimer
-                0x00000000080013d4       0x38 ./Code/src/virtualTimers.o
-                0x00000000080013d4                StartGTimer
+                0x0000000008001840       0x38 ./Code/src/virtualTimers.o
+                0x0000000008001840                StartGTimer
  .text.StopGTimer
-                0x000000000800140c       0x20 ./Code/src/virtualTimers.o
-                0x000000000800140c                StopGTimer
+                0x0000000008001878       0x20 ./Code/src/virtualTimers.o
+                0x0000000008001878                StopGTimer
  .text.GetGTimerVal
-                0x000000000800142c       0x20 ./Code/src/virtualTimers.o
-                0x000000000800142c                GetGTimerVal
+                0x0000000008001898       0x20 ./Code/src/virtualTimers.o
+                0x0000000008001898                GetGTimerVal
  .text.Reset_Handler
-                0x000000000800144c       0x50 ./startup_stm32f411xe.o
-                0x000000000800144c                Reset_Handler
+                0x00000000080018b8       0x50 ./startup_stm32f411xe.o
+                0x00000000080018b8                Reset_Handler
  .text.Default_Handler
-                0x000000000800149c        0x2 ./startup_stm32f411xe.o
-                0x000000000800149c                RTC_Alarm_IRQHandler
-                0x000000000800149c                EXTI2_IRQHandler
-                0x000000000800149c                DebugMon_Handler
-                0x000000000800149c                SPI4_IRQHandler
-                0x000000000800149c                TIM1_CC_IRQHandler
-                0x000000000800149c                DMA2_Stream5_IRQHandler
-                0x000000000800149c                HardFault_Handler
-                0x000000000800149c                DMA1_Stream5_IRQHandler
-                0x000000000800149c                SysTick_Handler
-                0x000000000800149c                PVD_IRQHandler
-                0x000000000800149c                SDIO_IRQHandler
-                0x000000000800149c                TAMP_STAMP_IRQHandler
-                0x000000000800149c                PendSV_Handler
-                0x000000000800149c                NMI_Handler
-                0x000000000800149c                EXTI3_IRQHandler
-                0x000000000800149c                I2C3_ER_IRQHandler
-                0x000000000800149c                EXTI0_IRQHandler
-                0x000000000800149c                I2C2_EV_IRQHandler
-                0x000000000800149c                DMA1_Stream2_IRQHandler
-                0x000000000800149c                FPU_IRQHandler
-                0x000000000800149c                UsageFault_Handler
-                0x000000000800149c                DMA2_Stream2_IRQHandler
-                0x000000000800149c                SPI1_IRQHandler
-                0x000000000800149c                TIM1_BRK_TIM9_IRQHandler
-                0x000000000800149c                DMA2_Stream3_IRQHandler
-                0x000000000800149c                DMA2_Stream0_IRQHandler
-                0x000000000800149c                TIM4_IRQHandler
-                0x000000000800149c                DMA1_Stream6_IRQHandler
-                0x000000000800149c                TIM3_IRQHandler
-                0x000000000800149c                RCC_IRQHandler
-                0x000000000800149c                Default_Handler
-                0x000000000800149c                EXTI15_10_IRQHandler
-                0x000000000800149c                ADC_IRQHandler
-                0x000000000800149c                DMA1_Stream7_IRQHandler
-                0x000000000800149c                SPI5_IRQHandler
-                0x000000000800149c                TIM5_IRQHandler
-                0x000000000800149c                I2C3_EV_IRQHandler
-                0x000000000800149c                EXTI9_5_IRQHandler
-                0x000000000800149c                RTC_WKUP_IRQHandler
-                0x000000000800149c                SPI2_IRQHandler
-                0x000000000800149c                MemManage_Handler
-                0x000000000800149c                DMA1_Stream0_IRQHandler
-                0x000000000800149c                SVC_Handler
-                0x000000000800149c                EXTI4_IRQHandler
-                0x000000000800149c                WWDG_IRQHandler
-                0x000000000800149c                TIM2_IRQHandler
-                0x000000000800149c                OTG_FS_WKUP_IRQHandler
-                0x000000000800149c                TIM1_TRG_COM_TIM11_IRQHandler
-                0x000000000800149c                EXTI1_IRQHandler
-                0x000000000800149c                USART2_IRQHandler
-                0x000000000800149c                I2C2_ER_IRQHandler
-                0x000000000800149c                DMA2_Stream1_IRQHandler
-                0x000000000800149c                FLASH_IRQHandler
-                0x000000000800149c                DMA2_Stream4_IRQHandler
-                0x000000000800149c                BusFault_Handler
-                0x000000000800149c                USART1_IRQHandler
-                0x000000000800149c                OTG_FS_IRQHandler
-                0x000000000800149c                SPI3_IRQHandler
-                0x000000000800149c                DMA1_Stream4_IRQHandler
-                0x000000000800149c                I2C1_ER_IRQHandler
-                0x000000000800149c                DMA2_Stream6_IRQHandler
-                0x000000000800149c                DMA1_Stream3_IRQHandler
- *fill*         0x000000000800149e        0x2 
+                0x0000000008001908        0x2 ./startup_stm32f411xe.o
+                0x0000000008001908                RTC_Alarm_IRQHandler
+                0x0000000008001908                EXTI2_IRQHandler
+                0x0000000008001908                DebugMon_Handler
+                0x0000000008001908                SPI4_IRQHandler
+                0x0000000008001908                TIM1_CC_IRQHandler
+                0x0000000008001908                DMA2_Stream5_IRQHandler
+                0x0000000008001908                HardFault_Handler
+                0x0000000008001908                DMA1_Stream5_IRQHandler
+                0x0000000008001908                SysTick_Handler
+                0x0000000008001908                PVD_IRQHandler
+                0x0000000008001908                SDIO_IRQHandler
+                0x0000000008001908                TAMP_STAMP_IRQHandler
+                0x0000000008001908                PendSV_Handler
+                0x0000000008001908                NMI_Handler
+                0x0000000008001908                EXTI3_IRQHandler
+                0x0000000008001908                I2C3_ER_IRQHandler
+                0x0000000008001908                EXTI0_IRQHandler
+                0x0000000008001908                I2C2_EV_IRQHandler
+                0x0000000008001908                DMA1_Stream2_IRQHandler
+                0x0000000008001908                FPU_IRQHandler
+                0x0000000008001908                UsageFault_Handler
+                0x0000000008001908                DMA2_Stream2_IRQHandler
+                0x0000000008001908                SPI1_IRQHandler
+                0x0000000008001908                TIM1_BRK_TIM9_IRQHandler
+                0x0000000008001908                DMA2_Stream3_IRQHandler
+                0x0000000008001908                DMA2_Stream0_IRQHandler
+                0x0000000008001908                TIM4_IRQHandler
+                0x0000000008001908                DMA1_Stream6_IRQHandler
+                0x0000000008001908                TIM3_IRQHandler
+                0x0000000008001908                RCC_IRQHandler
+                0x0000000008001908                Default_Handler
+                0x0000000008001908                EXTI15_10_IRQHandler
+                0x0000000008001908                ADC_IRQHandler
+                0x0000000008001908                DMA1_Stream7_IRQHandler
+                0x0000000008001908                SPI5_IRQHandler
+                0x0000000008001908                TIM5_IRQHandler
+                0x0000000008001908                I2C3_EV_IRQHandler
+                0x0000000008001908                EXTI9_5_IRQHandler
+                0x0000000008001908                RTC_WKUP_IRQHandler
+                0x0000000008001908                SPI2_IRQHandler
+                0x0000000008001908                MemManage_Handler
+                0x0000000008001908                DMA1_Stream0_IRQHandler
+                0x0000000008001908                SVC_Handler
+                0x0000000008001908                EXTI4_IRQHandler
+                0x0000000008001908                WWDG_IRQHandler
+                0x0000000008001908                TIM2_IRQHandler
+                0x0000000008001908                OTG_FS_WKUP_IRQHandler
+                0x0000000008001908                TIM1_TRG_COM_TIM11_IRQHandler
+                0x0000000008001908                EXTI1_IRQHandler
+                0x0000000008001908                USART2_IRQHandler
+                0x0000000008001908                I2C2_ER_IRQHandler
+                0x0000000008001908                DMA2_Stream1_IRQHandler
+                0x0000000008001908                FLASH_IRQHandler
+                0x0000000008001908                DMA2_Stream4_IRQHandler
+                0x0000000008001908                BusFault_Handler
+                0x0000000008001908                USART1_IRQHandler
+                0x0000000008001908                OTG_FS_IRQHandler
+                0x0000000008001908                SPI3_IRQHandler
+                0x0000000008001908                DMA1_Stream4_IRQHandler
+                0x0000000008001908                I2C1_ER_IRQHandler
+                0x0000000008001908                DMA2_Stream6_IRQHandler
+                0x0000000008001908                DMA1_Stream3_IRQHandler
+ *fill*         0x000000000800190a        0x2 
  .text.__libc_init_array
-                0x00000000080014a0       0x48 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/nofp\libc_nano.a(lib_a-init.o)
-                0x00000000080014a0                __libc_init_array
+                0x000000000800190c       0x48 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/nofp\libc_nano.a(lib_a-init.o)
+                0x000000000800190c                __libc_init_array
  *(.glue_7)
- .glue_7        0x00000000080014e8        0x0 linker stubs
+ .glue_7        0x0000000008001954        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x00000000080014e8        0x0 linker stubs
+ .glue_7t       0x0000000008001954        0x0 linker stubs
  *(.eh_frame)
- .eh_frame      0x00000000080014e8        0x0 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
+ .eh_frame      0x0000000008001954        0x0 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
  *(.init)
- .init          0x00000000080014e8        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crti.o
-                0x00000000080014e8                _init
- .init          0x00000000080014ec        0x8 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtn.o
+ .init          0x0000000008001954        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crti.o
+                0x0000000008001954                _init
+ .init          0x0000000008001958        0x8 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtn.o
  *(.fini)
- .fini          0x00000000080014f4        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crti.o
-                0x00000000080014f4                _fini
- .fini          0x00000000080014f8        0x8 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtn.o
-                0x0000000008001500                . = ALIGN (0x4)
-                0x0000000008001500                _etext = .
+ .fini          0x0000000008001960        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crti.o
+                0x0000000008001960                _fini
+ .fini          0x0000000008001964        0x8 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtn.o
+                0x000000000800196c                . = ALIGN (0x4)
+                0x000000000800196c                _etext = .
 
-.vfp11_veneer   0x0000000008001500        0x0
- .vfp11_veneer  0x0000000008001500        0x0 linker stubs
+.vfp11_veneer   0x000000000800196c        0x0
+ .vfp11_veneer  0x000000000800196c        0x0 linker stubs
 
-.v4_bx          0x0000000008001500        0x0
- .v4_bx         0x0000000008001500        0x0 linker stubs
+.v4_bx          0x000000000800196c        0x0
+ .v4_bx         0x000000000800196c        0x0 linker stubs
 
-.iplt           0x0000000008001500        0x0
- .iplt          0x0000000008001500        0x0 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
+.iplt           0x000000000800196c        0x0
+ .iplt          0x000000000800196c        0x0 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
 
-.rodata         0x0000000008001500      0x210
-                0x0000000008001500                . = ALIGN (0x4)
+.rodata         0x000000000800196c      0x230
+                0x000000000800196c                . = ALIGN (0x4)
  *(.rodata)
  *(.rodata*)
  .rodata.AHBPrescTable
-                0x0000000008001500       0x10 ./CMSIS/src/system_stm32f4xx.o
-                0x0000000008001500                AHBPrescTable
+                0x000000000800196c       0x10 ./CMSIS/src/system_stm32f4xx.o
+                0x000000000800196c                AHBPrescTable
  .rodata.auchCRCHi
-                0x0000000008001510      0x100 ./Code/src/CRC16.o
-                0x0000000008001510                auchCRCHi
+                0x000000000800197c      0x100 ./Code/src/CRC16.o
+                0x000000000800197c                auchCRCHi
  .rodata.auchCRCLo
-                0x0000000008001610      0x100 ./Code/src/CRC16.o
-                0x0000000008001610                auchCRCLo
-                0x0000000008001710                . = ALIGN (0x4)
+                0x0000000008001a7c      0x100 ./Code/src/CRC16.o
+                0x0000000008001a7c                auchCRCLo
+ .rodata.BuferLCDInit
+                0x0000000008001b7c       0x1e ./Code/src/lcd16xx.o
+                0x0000000008001b7c                BuferLCDInit
+                0x0000000008001b9c                . = ALIGN (0x4)
+ *fill*         0x0000000008001b9a        0x2 
 
-.rel.dyn        0x0000000008001710        0x0
- .rel.iplt      0x0000000008001710        0x0 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
+.rel.dyn        0x0000000008001b9c        0x0
+ .rel.iplt      0x0000000008001b9c        0x0 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
 
-.ARM            0x0000000008001710        0x0
-                0x0000000008001710                __exidx_start = .
+.ARM            0x0000000008001b9c        0x0
+                0x0000000008001b9c                __exidx_start = .
  *(.ARM.exidx*)
-                0x0000000008001710                __exidx_end = .
+                0x0000000008001b9c                __exidx_end = .
 
-.preinit_array  0x0000000008001710        0x0
-                0x0000000008001710                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x0000000008001b9c        0x0
+                0x0000000008001b9c                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x0000000008001710                PROVIDE (__preinit_array_end = .)
+                0x0000000008001b9c                PROVIDE (__preinit_array_end = .)
 
-.init_array     0x0000000008001710        0x4
-                0x0000000008001710                PROVIDE (__init_array_start = .)
+.init_array     0x0000000008001b9c        0x4
+                0x0000000008001b9c                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x0000000008001710        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
-                0x0000000008001714                PROVIDE (__init_array_end = .)
+ .init_array    0x0000000008001b9c        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
+                0x0000000008001ba0                PROVIDE (__init_array_end = .)
 
-.fini_array     0x0000000008001714        0x4
+.fini_array     0x0000000008001ba0        0x4
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x0000000008001714        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
+ .fini_array    0x0000000008001ba0        0x4 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x0000000008001718                _sidata = LOADADDR (.data)
+                0x0000000008001ba4                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000        0x4 load address 0x0000000008001718
+.data           0x0000000020000000        0x4 load address 0x0000000008001ba4
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -738,67 +751,69 @@ LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x0000000020000004                . = ALIGN (0x4)
                 0x0000000020000004                _edata = .
 
-.igot.plt       0x0000000020000004        0x0 load address 0x000000000800171c
+.igot.plt       0x0000000020000004        0x0 load address 0x0000000008001ba8
  .igot.plt      0x0000000020000004        0x0 c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
                 0x0000000020000004                . = ALIGN (0x4)
 
-.bss            0x0000000020000004      0x2d8 load address 0x000000000800171c
+.bss            0x0000000020000004      0x2dc load address 0x0000000008001ba8
                 0x0000000020000004                _sbss = .
                 0x0000000020000004                __bss_start__ = _sbss
  *(.bss)
  .bss           0x0000000020000004       0x1c c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp/crtbegin.o
  *(.bss*)
  *(COMMON)
- COMMON         0x0000000020000020       0x6c ./Code/src/lcd16xx.o
-                0x0000000020000020                i2cEntry
-                0x0000000020000021                _lcdStates
-                0x0000000020000022                _i2cSendStates
-                0x0000000020000024                I2C1Data
-                0x0000000020000088                lcdStates
-                0x0000000020000089                i2cSendStates
-                0x000000002000008a                I2C1BuferSendLenght
-                0x000000002000008b                lcdEntry
- COMMON         0x000000002000008c        0x3 ./Code/src/ledFSM.o
-                0x000000002000008c                statePis
-                0x000000002000008d                entryPis1
-                0x000000002000008e                _statePis
- *fill*         0x000000002000008f        0x1 
- COMMON         0x0000000020000090       0x1e ./Code/src/messages.o
-                0x0000000020000090                Messages
- *fill*         0x00000000200000ae        0x2 
- COMMON         0x00000000200000b0      0x212 ./Code/src/modbus.o
-                0x00000000200000b0                entry
-                0x00000000200000b1                _stateMessageGenSlave
-                0x00000000200000b2                _state
-                0x00000000200000b4                CRCVal
-                0x00000000200000b6                state
-                0x00000000200000b7                stateMessageGenSlave
-                0x00000000200000b8                _CurrentItemOfBuf
-                0x00000000200000bc                ModbusSendData
-                0x00000000200001bc                CRCRecVal
-                0x00000000200001c0                ModbusData
-                0x00000000200002c0                CurrentItemOfBuf
-                0x00000000200002c1                entryMessageGenSlave
- *fill*         0x00000000200002c2        0x2 
- COMMON         0x00000000200002c4       0x16 ./Code/src/virtualTimers.o
-                0x00000000200002c4                MRTUcount
-                0x00000000200002c8                GTimerVal
-                0x00000000200002d4                GTimerState
-                0x00000000200002d8                ReceptionStatus
-                0x00000000200002dc                . = ALIGN (0x4)
- *fill*         0x00000000200002da        0x2 
-                0x00000000200002dc                _ebss = .
-                0x00000000200002dc                __bss_end__ = _ebss
+ COMMON         0x0000000020000020       0x6f ./Code/src/lcd16xx.o
+                0x0000000020000020                I2C1LeftBorder
+                0x0000000020000021                i2cEntry
+                0x0000000020000022                I2C1NumberOfTransaction
+                0x0000000020000023                Schet
+                0x0000000020000024                _lcdStates
+                0x0000000020000025                _i2cSendStates
+                0x0000000020000028                I2C1Data
+                0x000000002000008c                lcdStates
+                0x000000002000008d                i2cSendStates
+                0x000000002000008e                lcdEntry
+ COMMON         0x000000002000008f        0x3 ./Code/src/ledFSM.o
+                0x000000002000008f                statePis
+                0x0000000020000090                entryPis1
+                0x0000000020000091                _statePis
+ *fill*         0x0000000020000092        0x2 
+ COMMON         0x0000000020000094       0x1e ./Code/src/messages.o
+                0x0000000020000094                Messages
+ *fill*         0x00000000200000b2        0x2 
+ COMMON         0x00000000200000b4      0x212 ./Code/src/modbus.o
+                0x00000000200000b4                entry
+                0x00000000200000b5                _stateMessageGenSlave
+                0x00000000200000b6                _state
+                0x00000000200000b8                CRCVal
+                0x00000000200000ba                state
+                0x00000000200000bb                stateMessageGenSlave
+                0x00000000200000bc                _CurrentItemOfBuf
+                0x00000000200000c0                ModbusSendData
+                0x00000000200001c0                CRCRecVal
+                0x00000000200001c4                ModbusData
+                0x00000000200002c4                CurrentItemOfBuf
+                0x00000000200002c5                entryMessageGenSlave
+ *fill*         0x00000000200002c6        0x2 
+ COMMON         0x00000000200002c8       0x16 ./Code/src/virtualTimers.o
+                0x00000000200002c8                MRTUcount
+                0x00000000200002cc                GTimerVal
+                0x00000000200002d8                GTimerState
+                0x00000000200002dc                ReceptionStatus
+                0x00000000200002e0                . = ALIGN (0x4)
+ *fill*         0x00000000200002de        0x2 
+                0x00000000200002e0                _ebss = .
+                0x00000000200002e0                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x00000000200002dc      0x400 load address 0x000000000800171c
-                0x00000000200002dc                . = ALIGN (0x4)
+                0x00000000200002e0      0x400 load address 0x0000000008001ba8
+                0x00000000200002e0                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (end = .)
                 [!provide]                        PROVIDE (_end = .)
-                0x00000000200002dc                . = (. + _Min_Heap_Size)
-                0x00000000200006dc                . = (. + _Min_Stack_Size)
- *fill*         0x00000000200002dc      0x400 
-                0x00000000200006dc                . = ALIGN (0x4)
+                0x00000000200002e0                . = (. + _Min_Heap_Size)
+                0x00000000200006e0                . = (. + _Min_Stack_Size)
+ *fill*         0x00000000200002e0      0x400 
+                0x00000000200006e0                . = ALIGN (0x4)
 
 .memory_b1_text
  *(.mb1text)
@@ -848,63 +863,63 @@ LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
 LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/nofp\libm.a
 LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v7e-m/nofp\libgcc.a
 
-.debug_info     0x0000000000000000     0x2bea
+.debug_info     0x0000000000000000     0x2c4e
  .debug_info    0x0000000000000000      0x572 ./CMSIS/src/system_stm32f4xx.o
  .debug_info    0x0000000000000572      0x1e8 ./Code/src/CRC16.o
- .debug_info    0x000000000000075a      0x674 ./Code/src/lcd16xx.o
- .debug_info    0x0000000000000dce      0x227 ./Code/src/ledFSM.o
- .debug_info    0x0000000000000ff5      0x1e3 ./Code/src/main.o
- .debug_info    0x00000000000011d8      0x1da ./Code/src/messages.o
- .debug_info    0x00000000000013b2      0x7be ./Code/src/modbus.o
- .debug_info    0x0000000000001b70      0xa53 ./Code/src/system.o
- .debug_info    0x00000000000025c3      0x605 ./Code/src/virtualTimers.o
- .debug_info    0x0000000000002bc8       0x22 ./startup_stm32f411xe.o
+ .debug_info    0x000000000000075a      0x6d8 ./Code/src/lcd16xx.o
+ .debug_info    0x0000000000000e32      0x227 ./Code/src/ledFSM.o
+ .debug_info    0x0000000000001059      0x1e3 ./Code/src/main.o
+ .debug_info    0x000000000000123c      0x1da ./Code/src/messages.o
+ .debug_info    0x0000000000001416      0x7be ./Code/src/modbus.o
+ .debug_info    0x0000000000001bd4      0xa53 ./Code/src/system.o
+ .debug_info    0x0000000000002627      0x605 ./Code/src/virtualTimers.o
+ .debug_info    0x0000000000002c2c       0x22 ./startup_stm32f411xe.o
 
-.debug_abbrev   0x0000000000000000      0xb78
+.debug_abbrev   0x0000000000000000      0xbae
  .debug_abbrev  0x0000000000000000      0x129 ./CMSIS/src/system_stm32f4xx.o
  .debug_abbrev  0x0000000000000129       0xde ./Code/src/CRC16.o
- .debug_abbrev  0x0000000000000207      0x13a ./Code/src/lcd16xx.o
- .debug_abbrev  0x0000000000000341      0x109 ./Code/src/ledFSM.o
- .debug_abbrev  0x000000000000044a       0xde ./Code/src/main.o
- .debug_abbrev  0x0000000000000528      0x10b ./Code/src/messages.o
- .debug_abbrev  0x0000000000000633      0x1fe ./Code/src/modbus.o
- .debug_abbrev  0x0000000000000831      0x1c5 ./Code/src/system.o
- .debug_abbrev  0x00000000000009f6      0x170 ./Code/src/virtualTimers.o
- .debug_abbrev  0x0000000000000b66       0x12 ./startup_stm32f411xe.o
+ .debug_abbrev  0x0000000000000207      0x170 ./Code/src/lcd16xx.o
+ .debug_abbrev  0x0000000000000377      0x109 ./Code/src/ledFSM.o
+ .debug_abbrev  0x0000000000000480       0xde ./Code/src/main.o
+ .debug_abbrev  0x000000000000055e      0x10b ./Code/src/messages.o
+ .debug_abbrev  0x0000000000000669      0x1fe ./Code/src/modbus.o
+ .debug_abbrev  0x0000000000000867      0x1c5 ./Code/src/system.o
+ .debug_abbrev  0x0000000000000a2c      0x170 ./Code/src/virtualTimers.o
+ .debug_abbrev  0x0000000000000b9c       0x12 ./startup_stm32f411xe.o
 
-.debug_aranges  0x0000000000000000      0x240
+.debug_aranges  0x0000000000000000      0x250
  .debug_aranges
                 0x0000000000000000       0x28 ./CMSIS/src/system_stm32f4xx.o
  .debug_aranges
                 0x0000000000000028       0x20 ./Code/src/CRC16.o
  .debug_aranges
-                0x0000000000000048       0x48 ./Code/src/lcd16xx.o
+                0x0000000000000048       0x58 ./Code/src/lcd16xx.o
  .debug_aranges
-                0x0000000000000090       0x28 ./Code/src/ledFSM.o
+                0x00000000000000a0       0x28 ./Code/src/ledFSM.o
  .debug_aranges
-                0x00000000000000b8       0x20 ./Code/src/main.o
+                0x00000000000000c8       0x20 ./Code/src/main.o
  .debug_aranges
-                0x00000000000000d8       0x38 ./Code/src/messages.o
+                0x00000000000000e8       0x38 ./Code/src/messages.o
  .debug_aranges
-                0x0000000000000110       0x60 ./Code/src/modbus.o
+                0x0000000000000120       0x60 ./Code/src/modbus.o
  .debug_aranges
-                0x0000000000000170       0x50 ./Code/src/system.o
+                0x0000000000000180       0x50 ./Code/src/system.o
  .debug_aranges
-                0x00000000000001c0       0x58 ./Code/src/virtualTimers.o
+                0x00000000000001d0       0x58 ./Code/src/virtualTimers.o
  .debug_aranges
-                0x0000000000000218       0x28 ./startup_stm32f411xe.o
+                0x0000000000000228       0x28 ./startup_stm32f411xe.o
 
-.debug_ranges   0x0000000000000000      0x1a8
+.debug_ranges   0x0000000000000000      0x1b8
  .debug_ranges  0x0000000000000000       0x18 ./CMSIS/src/system_stm32f4xx.o
  .debug_ranges  0x0000000000000018       0x10 ./Code/src/CRC16.o
- .debug_ranges  0x0000000000000028       0x38 ./Code/src/lcd16xx.o
- .debug_ranges  0x0000000000000060       0x18 ./Code/src/ledFSM.o
- .debug_ranges  0x0000000000000078       0x10 ./Code/src/main.o
- .debug_ranges  0x0000000000000088       0x28 ./Code/src/messages.o
- .debug_ranges  0x00000000000000b0       0x50 ./Code/src/modbus.o
- .debug_ranges  0x0000000000000100       0x40 ./Code/src/system.o
- .debug_ranges  0x0000000000000140       0x48 ./Code/src/virtualTimers.o
- .debug_ranges  0x0000000000000188       0x20 ./startup_stm32f411xe.o
+ .debug_ranges  0x0000000000000028       0x48 ./Code/src/lcd16xx.o
+ .debug_ranges  0x0000000000000070       0x18 ./Code/src/ledFSM.o
+ .debug_ranges  0x0000000000000088       0x10 ./Code/src/main.o
+ .debug_ranges  0x0000000000000098       0x28 ./Code/src/messages.o
+ .debug_ranges  0x00000000000000c0       0x50 ./Code/src/modbus.o
+ .debug_ranges  0x0000000000000110       0x40 ./Code/src/system.o
+ .debug_ranges  0x0000000000000150       0x48 ./Code/src/virtualTimers.o
+ .debug_ranges  0x0000000000000198       0x20 ./startup_stm32f411xe.o
 
 .debug_macro    0x0000000000000000     0xe583
  .debug_macro   0x0000000000000000       0xe0 ./CMSIS/src/system_stm32f4xx.o
@@ -937,38 +952,38 @@ LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_macro   0x000000000000e393      0x11b ./Code/src/system.o
  .debug_macro   0x000000000000e4ae       0xd5 ./Code/src/virtualTimers.o
 
-.debug_line     0x0000000000000000     0x34e9
+.debug_line     0x0000000000000000     0x3620
  .debug_line    0x0000000000000000      0x50e ./CMSIS/src/system_stm32f4xx.o
  .debug_line    0x000000000000050e      0x4b7 ./Code/src/CRC16.o
- .debug_line    0x00000000000009c5      0x643 ./Code/src/lcd16xx.o
- .debug_line    0x0000000000001008      0x53b ./Code/src/ledFSM.o
- .debug_line    0x0000000000001543      0x516 ./Code/src/main.o
- .debug_line    0x0000000000001a59      0x52e ./Code/src/messages.o
- .debug_line    0x0000000000001f87      0x869 ./Code/src/modbus.o
- .debug_line    0x00000000000027f0      0x698 ./Code/src/system.o
- .debug_line    0x0000000000002e88      0x5ea ./Code/src/virtualTimers.o
- .debug_line    0x0000000000003472       0x77 ./startup_stm32f411xe.o
+ .debug_line    0x00000000000009c5      0x772 ./Code/src/lcd16xx.o
+ .debug_line    0x0000000000001137      0x53b ./Code/src/ledFSM.o
+ .debug_line    0x0000000000001672      0x51e ./Code/src/main.o
+ .debug_line    0x0000000000001b90      0x534 ./Code/src/messages.o
+ .debug_line    0x00000000000020c4      0x863 ./Code/src/modbus.o
+ .debug_line    0x0000000000002927      0x698 ./Code/src/system.o
+ .debug_line    0x0000000000002fbf      0x5ea ./Code/src/virtualTimers.o
+ .debug_line    0x00000000000035a9       0x77 ./startup_stm32f411xe.o
 
-.debug_str      0x0000000000000000    0x50513
+.debug_str      0x0000000000000000    0x50546
  .debug_str     0x0000000000000000    0x4f6cd ./CMSIS/src/system_stm32f4xx.o
                                       0x4f84e (size before relaxing)
  .debug_str     0x000000000004f6cd       0x47 ./Code/src/CRC16.o
                                       0x4f391 (size before relaxing)
- .debug_str     0x000000000004f714      0x308 ./Code/src/lcd16xx.o
-                                      0x4f766 (size before relaxing)
- .debug_str     0x000000000004fa1c       0x42 ./Code/src/ledFSM.o
-                                      0x4f526 (size before relaxing)
- .debug_str     0x000000000004fa5e      0x2de ./Code/src/main.o
-                                      0x4f7e1 (size before relaxing)
- .debug_str     0x000000000004fd3c       0x52 ./Code/src/messages.o
+ .debug_str     0x000000000004f714      0x33b ./Code/src/lcd16xx.o
+                                      0x4f799 (size before relaxing)
+ .debug_str     0x000000000004fa4f       0x42 ./Code/src/ledFSM.o
+                                      0x4f527 (size before relaxing)
+ .debug_str     0x000000000004fa91      0x2de ./Code/src/main.o
+                                      0x4f7e2 (size before relaxing)
+ .debug_str     0x000000000004fd6f       0x52 ./Code/src/messages.o
                                       0x4f463 (size before relaxing)
- .debug_str     0x000000000004fd8e      0x1c0 ./Code/src/modbus.o
-                                      0x4fb22 (size before relaxing)
- .debug_str     0x000000000004ff4e      0x4bc ./Code/src/system.o
-                                      0x4fe3c (size before relaxing)
- .debug_str     0x000000000005040a       0xe2 ./Code/src/virtualTimers.o
-                                      0x4f6d1 (size before relaxing)
- .debug_str     0x00000000000504ec       0x27 ./startup_stm32f411xe.o
+ .debug_str     0x000000000004fdc1      0x1c0 ./Code/src/modbus.o
+                                      0x4fb23 (size before relaxing)
+ .debug_str     0x000000000004ff81      0x4bc ./Code/src/system.o
+                                      0x4fe3d (size before relaxing)
+ .debug_str     0x000000000005043d       0xe2 ./Code/src/virtualTimers.o
+                                      0x4f6d2 (size before relaxing)
+ .debug_str     0x000000000005051f       0x27 ./startup_stm32f411xe.o
                                          0x66 (size before relaxing)
 
 .comment        0x0000000000000000       0x53
@@ -983,14 +998,14 @@ LOAD c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  .comment       0x0000000000000053       0x54 ./Code/src/system.o
  .comment       0x0000000000000053       0x54 ./Code/src/virtualTimers.o
 
-.debug_frame    0x0000000000000000      0x634
+.debug_frame    0x0000000000000000      0x67c
  .debug_frame   0x0000000000000000       0x58 ./CMSIS/src/system_stm32f4xx.o
  .debug_frame   0x0000000000000058       0x38 ./Code/src/CRC16.o
- .debug_frame   0x0000000000000090       0xc4 ./Code/src/lcd16xx.o
- .debug_frame   0x0000000000000154       0x4c ./Code/src/ledFSM.o
- .debug_frame   0x00000000000001a0       0x2c ./Code/src/main.o
- .debug_frame   0x00000000000001cc       0xb0 ./Code/src/messages.o
- .debug_frame   0x000000000000027c      0x140 ./Code/src/modbus.o
- .debug_frame   0x00000000000003bc      0x108 ./Code/src/system.o
- .debug_frame   0x00000000000004c4      0x144 ./Code/src/virtualTimers.o
- .debug_frame   0x0000000000000608       0x2c c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/nofp\libc_nano.a(lib_a-init.o)
+ .debug_frame   0x0000000000000090      0x108 ./Code/src/lcd16xx.o
+ .debug_frame   0x0000000000000198       0x4c ./Code/src/ledFSM.o
+ .debug_frame   0x00000000000001e4       0x2c ./Code/src/main.o
+ .debug_frame   0x0000000000000210       0xb0 ./Code/src/messages.o
+ .debug_frame   0x00000000000002c0      0x144 ./Code/src/modbus.o
+ .debug_frame   0x0000000000000404      0x108 ./Code/src/system.o
+ .debug_frame   0x000000000000050c      0x144 ./Code/src/virtualTimers.o
+ .debug_frame   0x0000000000000650       0x2c c:/st/stm32cubeide_1.7.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_2.0.0.202105311346/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m/nofp\libc_nano.a(lib_a-init.o)

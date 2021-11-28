@@ -27,6 +27,8 @@
 #define ModbusMessageReceived	27					// Сообщение получено
 
 #define I2C1StartTransaction	10					// Начать передачу
+#define LCDStartInit			11					// Начать инициализацию дисплея
+
 
 
 /*************************	 Code	*************************/

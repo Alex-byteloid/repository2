@@ -352,7 +352,6 @@ void WriteSingleCoil (void){
 		if (ModbusData[4] == 0xff && ModbusData[5] == 0x00){
 
 			GPIOC->BSRR |= GPIO_BSRR_BS14;
-			SendMessage(I2C1StartTransaction);
 
 			for (uint8_t i = 0; i < _CurrentItemOfBuf - 2; i++){
 				ModbusSendData[i] = ModbusData[i];
@@ -363,7 +362,6 @@ void WriteSingleCoil (void){
 			if (ModbusData[4] == 0x00 && ModbusData[5] == 0xff){
 
 			GPIOC->BSRR |= GPIO_BSRR_BR14;
-			SendMessage(I2C1StartTransaction);
 
 			for (uint8_t i = 0; i < _CurrentItemOfBuf - 2; i++){
 				ModbusSendData[i] = ModbusData[i];

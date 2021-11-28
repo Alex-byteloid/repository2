@@ -33,5 +33,8 @@ void ProcessI2CWriteFSM (void);
 void DMA1_Stream1_IRQHandler (void);
 void I2C1_EV_IRQHandler (void);
 
+/* Функции для дисплея 16xx (16xx Display function) */
 
+void InitLcdFSM (void);
+void ProcessLcdFSM (void);
 
