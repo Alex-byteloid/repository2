@@ -20,15 +20,16 @@
 
 /********************* Global Variables *********************/
 
-const uint8_t BuferLCDInit[] = 	{0x3C, 0x38,  									/*	 0 - 1	-> пауза 4.1 м/с */
-								 0x3C, 0x38, 									/* 	 2 - 3 	-> пауза 100 мкс */
-								 0x2C, 0x28, 									/*	 4 - 5 	*/
-								 0x2C, 0x28, 0x8C, 0x88,						/*	 6 - 9  */
-								 0x0C, 0x08, 0xFC, 0xF8,						/*	10 - 13 */
-								 0x0C, 0x08, 0x1C, 0x18,						/*	14 - 17 */
-								 0x0C, 0x08, 0x6C, 0x68,						/*	18 - 21 */
-								 0x0C, 0x08, 0xFC, 0xF8,						/*	22 - 25 */
-								 0x0C, 0x08, 0x1C, 0x18
+const uint8_t BuferLCDInit[] = 	{0x3C, 0x38,  									/*	 0 - 1	-> пауза 6 м/с */
+								 0x3C, 0x38, 									/* 	 2 - 3 	-> пауза 2 м/с */
+								 0x3C, 0x38,									/*	 4 - 5 	*/
+								 0x2C, 0x28, 									/*	 6 - 7	*/
+								 0x2C, 0x28, 0x8C, 0x88,						/*	 8 - 11  */
+								 0x0C, 0x08, 0xFC, 0xF8,						/*	12 - 15 */
+								 0x0C, 0x08, 0x1C, 0x18,						/*	16 - 19 */
+								 0x0C, 0x08, 0x6C, 0x68,						/*	20 - 23 */
+								 0x0C, 0x08, 0xFC, 0xF8,						/*	24 - 27 */
+								 0x0C, 0x08, 0x1C, 0x18							/*	28 - 31	*/
 };
 
 const uint8_t DDRAMLCD1602 [2][16] = {{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F},
@@ -257,20 +258,6 @@ void ProcessLcdFSM (void){
 			StartGTimer(LCDTimer);
 		}
 
-		if (GetGTimerVal(LCDTimer) > 20){
-			if (I2C1NumberOfTransaction == 1){
-				StopGTimer(LCDTimer);
-				I2C1LeftBorder = 2;
-				SendMessage(I2C1StartTransaction);
-				StartGTimer(LCDTimer);
-			}
-			if (I2C1NumberOfTransaction == 3){
-				DMA1_Stream1->NDTR = 4;
-				lcdStates = 2;
-				StartGTimer(LCDTimer);
-			}
-		}
-
 		if (I2C1NumberOfTransaction == 2){
 			StopGTimer(LCDTimer);
 			I2C1LeftBorder = 4;
@@ -278,6 +265,25 @@ void ProcessLcdFSM (void){
 			StartGTimer(LCDTimer);
 		}
 
+		if (GetGTimerVal(LCDTimer) > 10){
+			if (I2C1NumberOfTransaction == 1){
+				StopGTimer(LCDTimer);
+				I2C1LeftBorder = 2;
+				SendMessage(I2C1StartTransaction);
+				StartGTimer(LCDTimer);
+			}
+			if (I2C1NumberOfTransaction == 3){
+				StopGTimer(LCDTimer);
+				I2C1LeftBorder = 6;
+				SendMessage(I2C1StartTransaction);
+				StartGTimer(LCDTimer);
+			}
+			if (I2C1NumberOfTransaction == 4){
+				DMA1_Stream1->NDTR = 4;
+				lcdStates = 2;
+				StartGTimer(LCDTimer);
+			}
+		}
 		break;
 
 	case 2:
