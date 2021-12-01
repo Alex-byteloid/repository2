@@ -27,16 +27,8 @@ int main (void){
 	InitLedFSM();
 	SendMessage(LedOnMsg);
 
-	InitI2C1FSM();
-
-	InitLcdFSM();
-
-	SendMessage(LCDStartInit);
-
 	while(1){
 
-		ProcessI2CWriteFSM();
-		ProcessLcdFSM();
 		ProcessModbusSlaveFSM();
 		ProcessLedFSM();
 		ProcessMessage();
