@@ -239,7 +239,7 @@ void ProcessLcdFSM (void){
 	case 0:
 		if (GetMessage(LCDStartInit)){
 
-			for (uint8_t i = 0; i < 30; i++){
+			for (uint8_t i = 0; i < 32; i++){
 				I2C1Data[i] = BuferLCDInit[i];
 			}
 			lcdStates = 1;
@@ -276,12 +276,12 @@ void ProcessLcdFSM (void){
 				StopGTimer(LCDTimer);
 				I2C1LeftBorder = 6;
 				SendMessage(I2C1StartTransaction);
-				StartGTimer(LCDTimer);
+//				StartGTimer(LCDTimer);
 			}
 			if (I2C1NumberOfTransaction == 4){
 				DMA1_Stream1->NDTR = 4;
 				lcdStates = 2;
-				StartGTimer(LCDTimer);
+//				StartGTimer(LCDTimer);
 			}
 		}
 		break;
@@ -289,49 +289,48 @@ void ProcessLcdFSM (void){
 	case 2:
 
 		if (lcdEntry == 1){
-			I2C1LeftBorder = 6;
+			I2C1LeftBorder = 8;
 			SendMessage(I2C1StartTransaction);
 		}
 
-		if (GetGTimerVal(LCDTimer) > 10){
-			StopGTimer(LCDTimer);
-			switch (I2C1NumberOfTransaction){
+		switch (I2C1NumberOfTransaction){
 
-					case 3:
-						StartGTimer(LCDTimer);
-						break;
 					case 4:
-						I2C1LeftBorder = 10;
-						SendMessage(I2C1StartTransaction);
-						StartGTimer(LCDTimer);
+
 						break;
 					case 5:
-						I2C1LeftBorder = 14;
+						I2C1LeftBorder = 8;
 						SendMessage(I2C1StartTransaction);
-						StartGTimer(LCDTimer);
 						break;
 					case 6:
-						I2C1LeftBorder = 18;
+						I2C1LeftBorder = 12;
 						SendMessage(I2C1StartTransaction);
-						StartGTimer(LCDTimer);
 						break;
 					case 7:
-						I2C1LeftBorder = 22;
+						I2C1LeftBorder = 16;
 						SendMessage(I2C1StartTransaction);
-						StartGTimer(LCDTimer);
+
 						break;
 					case 8:
-						I2C1LeftBorder = 26;
+						I2C1LeftBorder = 20;
 						SendMessage(I2C1StartTransaction);
-						StartGTimer(LCDTimer);
+
 						break;
 					case 9:
+						I2C1LeftBorder = 24;
+						SendMessage(I2C1StartTransaction);
+
+						break;
+					case 10:
+						I2C1LeftBorder = 28;
+						SendMessage(I2C1StartTransaction);
+
+						break;
+					case 11:
 						lcdStates = 3;
 						I2C1NumberOfTransaction = 0;
-						StopGTimer(LCDTimer);
 						break;
 					}
-		}
 		break;
 
 	case 3:

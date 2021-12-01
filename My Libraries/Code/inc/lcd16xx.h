@@ -37,4 +37,3 @@ void I2C1_EV_IRQHandler (void);
 
 void InitLcdFSM (void);
 void ProcessLcdFSM (void);
-
