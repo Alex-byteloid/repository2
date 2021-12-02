@@ -16,7 +16,7 @@
 
 // Идентификаторы глобальных таймеров
 #define GTimer1	0
-#define GTimer2 1
+#define I2C1Timer 1
 #define LCDTimer 2
 
 // Идентификаторы локальных таймеров

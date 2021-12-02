@@ -1,9 +1,6 @@
 /*********************** Description ************************/
 
-/*ВНИМАНИЕ! Для отправки по I2C данных через КА "ProcessI2CWriteFSM" нужно задавать значение переменных
- * "I2C1NumberOfTransaction" - это количество передач
- * "I2C1LeftBorder" - это стартовая граница отправки сообщения (то, откуда начинается отправка сообщения длиной "I2C1NumberOfTransaction"символов
- * */
+
 
 /******************************************************************************************************
  *												  ***											    ***
@@ -42,13 +39,11 @@ uint8_t _i2cSendStates;
 uint8_t i2cEntry;
 
 uint8_t I2C1NumberOfTransaction;						//	количество передач по I2C
-uint8_t I2C1LeftBorder;									//	стартовая граница отправки сообщения
+uint8_t I2C1SendBuferLenght;							//	длина перевадаемого буфера
 
 uint8_t lcdStates;
 uint8_t _lcdStates;
 uint8_t lcdEntry;
-
-uint8_t Schet;
 
 /*************************	 Code	*************************/
 
@@ -102,38 +97,17 @@ void InitI2C1 (void){
 
 }
 
-void InitDMAI2C1 (void){
-
-	RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
-
-	DMA1_Stream1->CR &= ~DMA_SxCR_CHSEL;
-
-//	DMA1_Stream1->M0AR = (uint32_t) & BuferLCDInit[0];
-	DMA1_Stream1->PAR = (uint32_t) & I2C1->DR;
-
-	DMA1_Stream1->NDTR = 2;
-
-	DMA1_Stream1->CR &= ~DMA_SxCR_MSIZE;
-	DMA1_Stream1->CR &= ~DMA_SxCR_PSIZE;
-
-	DMA1_Stream1->CR |= DMA_SxCR_MINC;
-	DMA1_Stream1->CR &= ~DMA_SxCR_PINC;
-
-	DMA1_Stream1->CR &= ~DMA_SxCR_PL;
-	DMA1_Stream1->CR |= DMA_SxCR_DIR_0;
-	DMA1_Stream1->CR &= ~DMA_SxCR_CIRC;
-
-	DMA1_Stream1->CR |= DMA_SxCR_TCIE;
-
-}
-
 void InitI2C1FSM (void){
 
 	InitI2C1();
-	InitDMAI2C1();
 
 	i2cSendStates = 0;
 	_i2cSendStates = 0;
+	I2C1NumberOfTransaction = 0;
+
+	for (uint8_t i = 0; i < I2C1DataBuferLenght; i++){
+		I2C1Data[i] = 0x00;
+	}
 }
 
 void ProcessI2CWriteFSM (void){
@@ -146,39 +120,40 @@ void ProcessI2CWriteFSM (void){
 
 	case 0:
 
-		if (i2cEntry == 1){
-			DMA1_Stream1->CR &= ~DMA_SxCR_EN;
-//			I2C1LeftBorder = 0;
-		}
-
 		if (GetMessage(I2C1StartTransaction)){
-			i2cSendStates = 1;
-			DMA1_Stream1->M0AR = (uint32_t) & I2C1Data[I2C1LeftBorder];
-			DMA1_Stream1->CR |= DMA_SxCR_EN;
+			if (I2C1SendBuferLenght != 0){
+				i2cSendStates = 1;
+			}
 		}
-
 		break;
 
 	case 1:
 
-		if (i2cEntry == 1){
-			I2C1->CR1 |= I2C_CR1_START;								// Генерируем СТАРТ условие
-			i2cSendStates = 2;
+		if (lcdEntry == 1){
+			I2C1->CR1 |= I2C_CR1_START;
 		}
 
+		if (GetGTimerVal(I2C1Timer) >= 1000){
+			i2cSendStates = 4;
+		}
 		break;
 
 	case 2:
-
-		if (GetGTimerVal(GTimer1) > 1000){
-			i2cSendStates = 3;
-			StopGTimer(GTimer1);
-		}
-
+		if (lcdEntry == 1) StopGTimer(I2C1Timer);
 		break;
 
 	case 3:
 
+		if (I2C1NumberOfTransaction == I2C1SendBuferLenght){
+			i2cSendStates = 0;
+			I2C1NumberOfTransaction = 0;
+		}
+		else {
+			i2cSendStates = 1;
+		}
+		break;
+
+	case 4:
 		GPIOC->BSRR |= GPIO_BSRR_BS15;
 
 		break;
@@ -190,31 +165,25 @@ void ProcessI2CWriteFSM (void){
 
 /*************************	 IRQ_Handler (Обработчики прерываний)	*************************/
 
-void DMA1_Stream1_IRQHandler (void){
-
-	if (DMA1->LISR & DMA_LISR_TCIF1){
-		I2C1->CR1 |= I2C_CR1_STOP;
-		I2C1->CR2 &= ~I2C_CR2_DMAEN;
-		i2cSendStates = 0;
-		I2C1NumberOfTransaction++;
-		DMA1->LIFCR |= DMA_LIFCR_CTCIF1;
-	}
-
-}
-
 void I2C1_EV_IRQHandler (void){
 
 	if (I2C1->SR1 & I2C_SR1_SB){
 		(void) I2C1->SR1;
-		StartGTimer(GTimer1);
+		StartGTimer(I2C1Timer);
 		I2C1->DR = AddrDevice;
-		I2C1->CR2 |= I2C_CR2_DMAEN;
 	}
 
 	if (I2C1->SR1 & I2C_SR1_ADDR){
 		(void) I2C1->SR1;
 		(void) I2C1->SR2;
-		StopGTimer(GTimer1);
+		i2cSendStates = 2;
+		I2C1->DR = I2C1Data[I2C1NumberOfTransaction];
+	}
+
+	if (I2C1->SR1 & I2C_SR1_BTF){
+		I2C1->CR1 |= I2C_CR1_STOP;
+		I2C1NumberOfTransaction++;
+		i2cSendStates = 3;
 	}
 
 }
@@ -226,7 +195,6 @@ void InitLcdFSM (void){
 	lcdStates = 0;
 	_lcdStates = 0;
 	I2C1LeftBorder = 0;
-
 }
 
 void ProcessLcdFSM (void){
@@ -276,12 +244,10 @@ void ProcessLcdFSM (void){
 				StopGTimer(LCDTimer);
 				I2C1LeftBorder = 6;
 				SendMessage(I2C1StartTransaction);
-//				StartGTimer(LCDTimer);
 			}
 			if (I2C1NumberOfTransaction == 4){
 				DMA1_Stream1->NDTR = 4;
 				lcdStates = 2;
-//				StartGTimer(LCDTimer);
 			}
 		}
 		break;
