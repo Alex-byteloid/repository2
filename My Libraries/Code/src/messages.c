@@ -10,6 +10,11 @@
 
 char Messages[MaxNumbMessages];
 
+typedef struct {
+	char Msg;
+	void* ParamPu;
+};
+
 /*************************	 Code	*************************/
 
 void InitMessage (void){

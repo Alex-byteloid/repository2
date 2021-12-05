@@ -39,24 +39,24 @@ void ProcessLedFSM (void){
 	case 1:
 		if (entryPis1 == 1){
 			GPIOC->BSRR |= GPIO_BSRR_BS13;
-			StartGTimer(GTimer2);
+			StartGTimer(LEDTimer);
 		}
 
-		if (GetGTimerVal(GTimer2) >= 2000){
+		if (GetGTimerVal(LEDTimer) >= 2000){
 			statePis = 2;
-			StopGTimer(GTimer2);
+			StopGTimer(LEDTimer);
 		}
 		break;
 
 	case 2:
 		if (entryPis1 == 1){
 			GPIOC->BSRR |= GPIO_BSRR_BR13;
-			StartGTimer(GTimer2);
+			StartGTimer(LEDTimer);
 		}
 
-		if (GetGTimerVal(GTimer2) >= 2000){
+		if (GetGTimerVal(LEDTimer) >= 2000){
 			statePis = 1;
-			StopGTimer(GTimer2);
+			StopGTimer(LEDTimer);
 		}
 		break;
 	}

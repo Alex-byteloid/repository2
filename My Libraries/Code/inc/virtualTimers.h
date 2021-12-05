@@ -9,15 +9,16 @@
 
 /*************************	Define	*************************/
 
-#define MaxGTimers 		3 						// Максимальное количество глобальных таймеров
+#define MaxGTimers 		4 						// Максимальное количество глобальных таймеров
 
 #define ReceptionStopped	50
 #define ReceptionEnabled	100
 
 // Идентификаторы глобальных таймеров
-#define GTimer1	0
-#define I2C1Timer 1
-#define LCDTimer 2
+#define GTimer1		0
+#define I2C1Timer 	1
+#define LCDTimer 	2
+#define LEDTimer	3
 
 // Идентификаторы локальных таймеров
 #define LocTimer1	0

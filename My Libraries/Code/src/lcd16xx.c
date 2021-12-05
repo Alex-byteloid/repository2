@@ -129,7 +129,7 @@ void ProcessI2CWriteFSM (void){
 
 	case 1:
 
-		if (lcdEntry == 1){
+		if (i2cEntry == 1){
 			I2C1->CR1 |= I2C_CR1_START;
 		}
 
@@ -139,14 +139,13 @@ void ProcessI2CWriteFSM (void){
 		break;
 
 	case 2:
-		if (lcdEntry == 1) StopGTimer(I2C1Timer);
+		if (i2cEntry == 1) StopGTimer(I2C1Timer);
 		break;
 
 	case 3:
 
 		if (I2C1NumberOfTransaction == I2C1SendBuferLenght){
 			i2cSendStates = 0;
-			I2C1NumberOfTransaction = 0;
 		}
 		else {
 			i2cSendStates = 1;
@@ -194,7 +193,6 @@ void InitLcdFSM (void){
 
 	lcdStates = 0;
 	_lcdStates = 0;
-	I2C1LeftBorder = 0;
 }
 
 void ProcessLcdFSM (void){
@@ -207,7 +205,7 @@ void ProcessLcdFSM (void){
 	case 0:
 		if (GetMessage(LCDStartInit)){
 
-			for (uint8_t i = 0; i < 32; i++){
+			for (uint8_t i = 0; i < 8; i++){
 				I2C1Data[i] = BuferLCDInit[i];
 			}
 			lcdStates = 1;
@@ -217,36 +215,27 @@ void ProcessLcdFSM (void){
 	case 1:
 
 		if (lcdEntry == 1){
-			I2C1LeftBorder = 0;
-			DMA1_Stream1->NDTR = 2;
+			I2C1SendBuferLenght = 4;
 			SendMessage(I2C1StartTransaction);
 		}
 
-		if (I2C1NumberOfTransaction == 1){
+		if (I2C1NumberOfTransaction == 4){
 			StartGTimer(LCDTimer);
-		}
-
-		if (I2C1NumberOfTransaction == 2){
-			StopGTimer(LCDTimer);
-			I2C1LeftBorder = 4;
-			SendMessage(I2C1StartTransaction);
-			StartGTimer(LCDTimer);
+			I2C1SendBuferLenght = 6;
 		}
 
 		if (GetGTimerVal(LCDTimer) > 10){
-			if (I2C1NumberOfTransaction == 1){
+			if (I2C1NumberOfTransaction == 4){
 				StopGTimer(LCDTimer);
-				I2C1LeftBorder = 2;
 				SendMessage(I2C1StartTransaction);
 				StartGTimer(LCDTimer);
 			}
-			if (I2C1NumberOfTransaction == 3){
+			if (I2C1NumberOfTransaction == 6){
 				StopGTimer(LCDTimer);
-				I2C1LeftBorder = 6;
+				I2C1SendBuferLenght = 8;
 				SendMessage(I2C1StartTransaction);
 			}
-			if (I2C1NumberOfTransaction == 4){
-				DMA1_Stream1->NDTR = 4;
+			if (I2C1NumberOfTransaction == 8){
 				lcdStates = 2;
 			}
 		}
@@ -255,48 +244,19 @@ void ProcessLcdFSM (void){
 	case 2:
 
 		if (lcdEntry == 1){
-			I2C1LeftBorder = 8;
+			for (uint8_t i = 0; i < 24; i++){
+				I2C1Data[i] = BuferLCDInit[i+8];
+			}
+			I2C1NumberOfTransaction = 0;
+			I2C1SendBuferLenght = 24;
 			SendMessage(I2C1StartTransaction);
 		}
 
-		switch (I2C1NumberOfTransaction){
-
-					case 4:
-
-						break;
-					case 5:
-						I2C1LeftBorder = 8;
-						SendMessage(I2C1StartTransaction);
-						break;
-					case 6:
-						I2C1LeftBorder = 12;
-						SendMessage(I2C1StartTransaction);
-						break;
-					case 7:
-						I2C1LeftBorder = 16;
-						SendMessage(I2C1StartTransaction);
-
-						break;
-					case 8:
-						I2C1LeftBorder = 20;
-						SendMessage(I2C1StartTransaction);
-
-						break;
-					case 9:
-						I2C1LeftBorder = 24;
-						SendMessage(I2C1StartTransaction);
-
-						break;
-					case 10:
-						I2C1LeftBorder = 28;
-						SendMessage(I2C1StartTransaction);
-
-						break;
-					case 11:
-						lcdStates = 3;
-						I2C1NumberOfTransaction = 0;
-						break;
-					}
+		if (I2C1NumberOfTransaction == 24){
+			I2C1NumberOfTransaction = 0;
+			I2C1SendBuferLenght = 0;
+			lcdStates = 3;
+		}
 		break;
 
 	case 3:
