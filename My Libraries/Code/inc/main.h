@@ -9,7 +9,7 @@
 #include "ledFSM.h"
 #include "messages.h"
 #include "modbus.h"
-#include "lcd16xx.h"
+#include "I2C.h"
 
 /*************************	Define	*************************/
 

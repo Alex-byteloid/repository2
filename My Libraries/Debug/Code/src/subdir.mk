@@ -6,6 +6,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Code/src/CRC16.c \
+../Code/src/I2C.c \
 ../Code/src/lcd16xx.c \
 ../Code/src/ledFSM.c \
 ../Code/src/main.c \
@@ -16,6 +17,7 @@ C_SRCS += \
 
 OBJS += \
 ./Code/src/CRC16.o \
+./Code/src/I2C.o \
 ./Code/src/lcd16xx.o \
 ./Code/src/ledFSM.o \
 ./Code/src/main.o \
@@ -26,6 +28,7 @@ OBJS += \
 
 C_DEPS += \
 ./Code/src/CRC16.d \
+./Code/src/I2C.d \
 ./Code/src/lcd16xx.d \
 ./Code/src/ledFSM.d \
 ./Code/src/main.d \

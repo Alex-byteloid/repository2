@@ -25,16 +25,13 @@ int main (void){
 	InitMessage();
 	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
 	InitLedFSM();
-	SendMessage(LedOnMsg);
+	SendMessage(LedOnMsg, 0, 0);
 
 	InitI2C1FSM();
-	InitLcdFSM();
-	SendMessage(LCDStartInit);
 
 	while(1){
 
 		ProcessI2CWriteFSM();
-		ProcessLcdFSM();
 
 		ProcessModbusSlaveFSM();
 		ProcessLedFSM();

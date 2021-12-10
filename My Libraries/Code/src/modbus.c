@@ -211,12 +211,12 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 		CRCRecVal = ((CrcHi << 8) | CrcLo);									// Записываем во временную переменную значение принятой контрольной суммы
 
 		if (CRCVal == CRCRecVal) {											// Сравниваем значения контрольных сумм
-			SendMessage(ModbusMessageReceived);								// Сообщение Modbus получено
+			SendMessage(ModbusMessageReceived, 0, 0);						// Сообщение Modbus получено
 			_CurrentItemOfBuf = CurrentItemOfBuf;
 			state = 0;
 		}
 		else {
-			SendMessage(ModbusCRCNotOk);
+			SendMessage(ModbusCRCNotOk, 0, 0);
 			state = 4;
 		}
 
@@ -224,7 +224,7 @@ void ProcessSlaveModbusMessageReceptionRTUFSM (void){
 
 	case 4:
 
-		SendMessage(ModbusError);
+		SendMessage(ModbusError, 0, 0);
 		state = 0;
 
 		break;
@@ -319,7 +319,7 @@ void ModbusUSART_IRQHandler (void){
 
 		ModbusData[CurrentItemOfBuf] = USART->DR;				// Помещаем содержимое регистра данных USART  буфер сообщения Modbus
 		CurrentItemOfBuf++;										// Инкрементируем указатель на текущий элемент буфера
-		SendMessage(ModbusReciveSymbol);						// Активируем сообщение ModbusReciveSymbol
+		SendMessage(ModbusReciveSymbol, 0, 0);					// Активируем сообщение ModbusReciveSymbol
 	}
 
 	if (USART->SR & USART_SR_ORE){
