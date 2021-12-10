@@ -10,7 +10,7 @@
 
 uint8_t i2cSendStates;									// Текущее состояние конечного автомата отправки данных по I2C
 uint8_t _i2cSendStates;									// Предыдущее состояние конечного автомата отправки данных по I2C
-uint8_t i2cEntry;										// Переменная входа в состояние
+uint8_t i2cEntry;										// Переменная для индикации первого входа в состояние
 
 uint8_t I2C1Data [I2C1DataBuferLenght];					// Буфер отправки данных I2C
 
@@ -158,4 +158,8 @@ void ClearI2C1DataBufer (void){
 	for (uint8_t Clear = 0; Clear < I2C1DataBuferLenght; Clear++){
 		I2C1Data[Clear] = 0x00;
 	}
+}
+
+void WriteToI2C1DataBufer (uint8_t Data, uint8_t Position){
+	I2C1Data[Position] = Data;
 }

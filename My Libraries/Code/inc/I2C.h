@@ -33,4 +33,6 @@ void InitI2C1 (void);
 void InitI2C1FSM (void);
 void ProcessI2CWriteFSM (void);
 void I2C1_EV_IRQHandler (void);
+
 void ClearI2C1DataBufer (void);
+void WriteToI2C1DataBufer (uint8_t Data, uint8_t Position);
