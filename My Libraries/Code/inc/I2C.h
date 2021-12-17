@@ -21,8 +21,11 @@
 /************************* Messages *************************/
 /*
  *
- * #define I2CStartTransaction		10		// Начать передачу
- * #define I2CAddrOk				11		// Есть ответ от устройства с заданным адресом
+ * #define I2C1StartTransaction		10		// Начать передачу
+ * #define I2C1SendByteComplete		11		// Есть ответ от устройства с заданным адресом
+ * #define I2C1PauseTransaction		12		// Приостановка отправки буфера I2C1
+ * #define I2C1ReleaseTransaction	13		// Возобновить отправку буфера I2C1
+ * #define I2C1EndOfTransaction		14		// Заданное количество элементов буфера отправлено
  *
  * */
 

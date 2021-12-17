@@ -17,9 +17,12 @@
 #define LedOnMsg				1
 
 #define I2C1StartTransaction	10					// Начать передачу
-#define I2CAddrOk				11					// Есть ответ от устройства с заданным адресом
+#define I2C1SendByteComplete	11					// Байт отправлен, стоп условие сгенерировано
+#define I2C1PauseTransaction	12					// Приостановка отправки буфера I2C1
+#define I2C1ReleaseTransaction	13					// Возобновить отправку буфера I2C1
+#define I2C1EndOfTransaction	14					// Заданное количество элементов буфера отправлено
 
-#define LCDStartInit			13					// Начать инициализацию дисплея
+#define LCDStartInit			15					// Начать инициализацию дисплея
 
 #define ModbusError				21					// Ошибка Modbus
 #define ModbusReciveSymbol		22					// USART-Modbus принял символ
@@ -32,7 +35,7 @@
 /*************************	 Code	*************************/
 
 void InitMessage (void);
-void SendMessage (uint16_t Message, uint16_t ParametrOne, uint16_t ParametrTwo);
+void SendMessage (uint8_t Message, uint16_t ParametrOne, uint16_t ParametrTwo);
 void ProcessMessage (void);
 uint8_t GetMessage (uint8_t Message);
 

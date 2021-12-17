@@ -8,13 +8,15 @@
 
 /********************* Global Variables *********************/
 
-typedef struct {
+struct MSG{
 	char Msg;
 	uint16_t ParamOne;
 	uint16_t ParamTwo;
-}MSG;
+};
 
-MSG Messages [MaxNumbMessages];
+struct MSG Messages[MaxNumbMessages];
+
+
 
 /*************************	 Code	*************************/
 
@@ -29,7 +31,7 @@ void InitMessage (void){
 	}
 }
 
-void SendMessage (uint16_t Message, uint16_t ParametrOne, uint16_t ParametrTwo){
+void SendMessage (uint8_t Message, uint16_t ParametrOne, uint16_t ParametrTwo){
 
 	if (Messages[Message].Msg == '0'){
 

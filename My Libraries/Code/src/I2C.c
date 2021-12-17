@@ -1,6 +1,9 @@
 /*********************** Description ************************/
 
-
+/*
+ * Первый параметр сообщения I2C1StartTransaction это стартовый адрес элемента буфера для отправки
+ * Второй параметр сообщения I2C1StartTransaction это длина передаваемого буфера
+ * */
 
 /************************* Includes *************************/
 
@@ -12,10 +15,14 @@ uint8_t i2cSendStates;									// Текущее состояние конечн
 uint8_t _i2cSendStates;									// Предыдущее состояние конечного автомата отправки данных по I2C
 uint8_t i2cEntry;										// Переменная для индикации первого входа в состояние
 
-uint8_t I2C1Data [I2C1DataBuferLenght];					// Буфер отправки данных I2C
+uint8_t I2C1Data [I2C1DataBuferLenght];					// Буфер отправки данных I2C1
 
-uint8_t I2C1NumberOfTransaction;						//	количество текущих передач по I2C (по совместимости адрес первого элемента буфера)
-uint8_t I2C1SendBuferLenght;							//	длина перевадаемого буфера
+uint8_t I2C1NumberOfTransaction;						// Количество текущих передач по I2C1
+
+uint16_t I2C1CurrentBuferItem;							// Текущий отправляемый элемент буфера
+uint16_t I2C1SendBuferLenght;							// Длина перевадаемого буфера
+
+
 
 /*************************	 Code	*************************/
 
@@ -92,6 +99,8 @@ void ProcessI2CWriteFSM (void){
 
 		if (GetMessage(I2C1StartTransaction)){
 			i2cSendStates = 1;
+//			I2C1CurrentBuferItem = Messages[I2C1StartTransaction].ParamOne;
+//			I2C1SendBuferLenght = Messages[I2C1StartTransaction].ParamTwo;
 		}
 		break;
 
@@ -102,25 +111,44 @@ void ProcessI2CWriteFSM (void){
 		}
 
 		if (GetGTimerVal(I2C1Timer) >= 2000){
-			i2cSendStates = 3;
+			i2cSendStates = 5;
 		}
 
-		if (GetMessage(I2CAddrOk)){
+		if (GetMessage(I2C1SendByteComplete)){
 			i2cSendStates = 2;
 		}
 		break;
 
 	case 2:
 
-		if (I2C1NumberOfTransaction == I2C1SendBuferLenght){
-			i2cSendStates = 0;
+		if(GetMessage(I2C1PauseTransaction)){
+			i2cSendStates = 4;
 		}
 		else {
-			i2cSendStates = 1;
+			if (I2C1NumberOfTransaction == I2C1SendBuferLenght){
+				i2cSendStates = 3;
+			}
+			else {
+				i2cSendStates = 1;
+			}
 		}
 		break;
 
 	case 3:
+		SendMessage(I2C1EndOfTransaction, 0, 0);
+		I2C1NumberOfTransaction = 0;
+		I2C1SendBuferLenght = 0;
+		I2C1CurrentBuferItem = 0;
+		i2cSendStates = 0;
+		break;
+
+	case 4:
+		if (GetMessage(I2C1ReleaseTransaction)){
+			i2cSendStates = 1;
+		}
+		break;
+
+	case 5:
 
 		GPIOC->BSRR |= GPIO_BSRR_BS15;
 		break;
@@ -143,13 +171,15 @@ void I2C1_EV_IRQHandler (void){
 	if (I2C1->SR1 & I2C_SR1_ADDR){
 		(void) I2C1->SR1;
 		(void) I2C1->SR2;
-		SendMessage(I2CAddrOk, 0, 0);
-		I2C1->DR = I2C1Data[I2C1NumberOfTransaction];
+		StopGTimer(I2C1Timer);
+		I2C1->DR = I2C1Data [I2C1CurrentBuferItem];
 	}
 
 	if (I2C1->SR1 & I2C_SR1_BTF){
 		I2C1->CR1 |= I2C_CR1_STOP;
+		SendMessage(I2C1SendByteComplete, 0, 0);
 		I2C1NumberOfTransaction++;
+		I2C1CurrentBuferItem++;
 	}
 
 }

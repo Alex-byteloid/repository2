@@ -23,17 +23,12 @@ int main (void){
 	InitGTimer();
 	InitTIM10();
 	InitMessage();
-	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
+
 	InitLedFSM();
 	SendMessage(LedOnMsg, 0, 0);
 
-	InitI2C1FSM();
-
 	while(1){
 
-		ProcessI2CWriteFSM();
-
-		ProcessModbusSlaveFSM();
 		ProcessLedFSM();
 		ProcessMessage();
 

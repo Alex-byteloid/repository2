@@ -2,9 +2,7 @@
 
 /*
  *
- * Буфер I2C интерфейса настраивается на 68(для 1602) байт (по 34 байта на каждую строку дисплея).
- * Где первые два байта (0 и 1) - установка курсора для первой строки дисплея, а
- * средние два байта (34 и 35) - установка курсора для второй строки дисплея.
+ *
  *
  * */
 
@@ -22,10 +20,11 @@
 #include "lcd16xx.h"
 
 /********************* Global Variables *********************/
+extern uint8_t I2C1Data [I2C1DataBuferLenght];
 
-const uint8_t BuferLCDInit[] = 	{0x3C, 0x38,  									/*	 0 - 1	-> пауза 6 м/с */
-								 0x3C, 0x38, 									/* 	 2 - 3 	-> пауза 2 м/с */
-								 0x3C, 0x38,									/*	 4 - 5 	*/
+const uint8_t BuferLCDInit[] = 	{0x3C, 0x38,  									/*	 0 - 1	*/
+								 0x3C, 0x38, 									/* 	 2 - 3 	-> пауза 6 м/с */
+								 0x3C, 0x38,									/*	 4 - 5 	-> пауза 2 м/с */
 								 0x2C, 0x28, 									/*	 6 - 7	*/
 								 0x2C, 0x28, 0x8C, 0x88,						/*	 8 - 11  */
 								 0x0C, 0x08, 0xFC, 0xF8,						/*	12 - 15 */
@@ -61,22 +60,53 @@ void ProcessLcdFSM (void){
 	case 0:
 		if (GetMessage(LCDStartInit)){
 			ClearI2C1DataBufer();
+			for (uint8_t s = 0; s < 32; s++){
+				I2C1Data[s] = BuferLCDInit[s];
+			}
 		}
 		break;
 
 	case 1:
-
 		if (lcdEntry == 1){
-
+			SendMessage(I2C1StartTransaction, 0, 4);
+		}
+		if (GetMessage(I2C1EndOfTransaction)){
+			StartGTimer(LCDTimer);
+		}
+		if (GetGTimerVal(LCDTimer) > 10){
+			StopGTimer(LCDTimer);
+			lcdStates = 2;
 		}
 		break;
 
 	case 2:
+		if (lcdEntry == 1){
+			SendMessage(I2C1StartTransaction, 4, 2);
+			StartGTimer(LCDTimer);
+			StopGTimer(LCDTimer);
+		}
 
+		if (GetMessage(I2C1EndOfTransaction)){
+			StartGTimer(LCDTimer);
+		}
 
+		if (GetGTimerVal(LCDTimer) > 4){
+			StopGTimer(LCDTimer);
+			lcdStates = 3;
+		}
 		break;
 
 	case 3:
+		if (lcdEntry == 1){
+			SendMessage(I2C1StartTransaction, 6, 26);
+		}
+		if (GetMessage(I2C1EndOfTransaction)){
+			ClearI2C1DataBufer();
+			lcdStates = 4;
+		}
+		break;
+
+	case 4:
 
 		break;
 
