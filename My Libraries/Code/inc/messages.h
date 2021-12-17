@@ -16,6 +16,8 @@
 
 #define LedOnMsg				1
 
+#define WSLedStart				2
+
 #define I2C1StartTransaction	10					// Начать передачу
 #define I2C1SendByteComplete	11					// Байт отправлен, стоп условие сгенерировано
 #define I2C1PauseTransaction	12					// Приостановка отправки буфера I2C1

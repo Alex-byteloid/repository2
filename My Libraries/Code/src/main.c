@@ -23,13 +23,15 @@ int main (void){
 	InitGTimer();
 	InitTIM10();
 	InitMessage();
+	InitWS281xFSM();
 
 	InitLedFSM();
 	SendMessage(LedOnMsg, 0, 0);
-
+	SendMessage(WSLedStart, 0, 0);
 	while(1){
 
 		ProcessLedFSM();
+		ProcessWS281xFSM();
 		ProcessMessage();
 
 	}

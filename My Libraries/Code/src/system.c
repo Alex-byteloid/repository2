@@ -68,12 +68,15 @@ void UpdateNVICActiveAndPriority (void){
 
 //	__NVIC_EnableIRQ(USART6_IRQn);											// Разрешаем прерывания от USART для Modbus
 	__NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);									// Разрешаем прерывания от 10-го таймера
+	__NVIC_EnableIRQ(DMA1_Stream4_IRQn);									// Зазрешаем прерывание от 4 потока ПДП контроллера обслуживающего таймер №3
+
 //	__NVIC_EnableIRQ(DMA2_Stream7_IRQn);									// Разрешаем прерывания от DMA обслуживающего USART Modbus
 //	__NVIC_EnableIRQ(I2C1_EV_IRQn);											// Разрешаем прерывания событий I2C1
 
 //	__NVIC_SetPriority(USART6_IRQn, NVIC_EncodePriority(1, 0, 2));			// Устанавливаем Modbus прерывание в первую группу, первым приоритетом
 	__NVIC_SetPriority(TIM1_UP_TIM10_IRQn, NVIC_EncodePriority(2, 1, 3));	// Прервания 10го таймера за прерыванием Modbus
-//	__NVIC_SetPriority(DMA2_Stream7_IRQn, NVIC_EncodePriority(1, 1, 3));
+	__NVIC_SetPriority(DMA1_Stream4_IRQn, NVIC_EncodePriority(2, 0, 0));
+	//	__NVIC_SetPriority(DMA2_Stream7_IRQn, NVIC_EncodePriority(1, 1, 3));
 //	__NVIC_SetPriority(I2C1_EV_IRQn, NVIC_EncodePriority(3, 2, 3));
 
 }

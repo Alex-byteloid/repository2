@@ -8,6 +8,7 @@
 #include "virtualTimers.h"
 #include "ledFSM.h"
 #include "messages.h"
+#include "WS2812.h"
 
 /*************************	Define	*************************/
 

@@ -1,6 +1,7 @@
 "./CMSIS/src/system_stm32f4xx.o"
 "./Code/src/CRC16.o"
 "./Code/src/I2C.o"
+"./Code/src/WS2812.o"
 "./Code/src/lcd16xx.o"
 "./Code/src/ledFSM.o"
 "./Code/src/main.o"
