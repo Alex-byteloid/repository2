@@ -60,8 +60,8 @@ all: main-build
 main-build: My\ Libraries.elf secondary-outputs
 
 # Tool invocations
-My\ Libraries.elf: $(OBJS) $(USER_OBJS) C:\Users\Human\Documents\GitHub\repository2\My\ Libraries\LinkerScript.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "My Libraries.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Human\Documents\GitHub\repository2\My Libraries\LinkerScript.ld" --specs=nosys.specs -Wl,-Map="My Libraries.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+My\ Libraries.elf: $(OBJS) $(USER_OBJS) C:\Users\Aleksandr\Documents\GitHub\repository2\My\ Libraries\LinkerScript.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "My Libraries.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Aleksandr\Documents\GitHub\repository2\My Libraries\LinkerScript.ld" --specs=nosys.specs -Wl,-Map="My Libraries.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -82,7 +82,7 @@ My\ Libraries.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 
 # Other Targets
 clean:
-	-$(RM) My\ Libraries.bin My\ Libraries.elf My\ Libraries.list My\\ Libraries.elf default.size.stdout
+	-$(RM) $(SIZE_OUTPUT)$(OBJDUMP_LIST)$(EXECUTABLES)$(OBJS)$(S_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(OBJCOPY_BIN) "My Libraries.elf"
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
@@ -94,6 +94,6 @@ fail-specified-linker-script-missing:
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
-.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
+.PHONY: all clean dependents fail-specified-linker-script-missing warn-no-linker-script-specified
 
 -include ../makefile.targets

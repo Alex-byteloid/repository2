@@ -20,7 +20,7 @@ struct RingBuffer{
 	uint16_t Count;						// Количество байт, сохранённых в буфере на текущий момент
 }RingBufferWS281x;
 
-uint8_t BufferDMAforWS [240];
+uint8_t BufferDMAforWS [8160];			// Буфер на 340 светодиодов (Отправляется на ленту в течение примерно 10 мс)
 
 uint32_t LedStrip [NumberOfLeds];
 uint32_t SendLed;
@@ -115,7 +115,7 @@ void DMA1_Stream4_IRQHandler (void){
 
 	SendLed++;																		// Инкрементируем переменную-счётчик
 
-	if (RingBufferWS281x.Out == 240) RingBufferWS281x.Out = 0;
+	if (RingBufferWS281x.Out == 8160) RingBufferWS281x.Out = 0;
 
 	if ((DMA1_Stream4->CR & DMA_SxCR_CT) == DMA_SxCR_CT){
 		for(uint8_t s = 0; s < 24; s++){
@@ -160,24 +160,33 @@ void ProcessWS281xFSM (void){
 
 	case 1:
 		if (entryWS281x == 1){
-			InsertToRingBufferForDMA(Black);
-			InsertToRingBufferForDMA(Black);
+//			InsertToRingBufferForDMA(Black);
+//			InsertToRingBufferForDMA(Black);
+		}
+
+		if (RingBufferWS281x.Count < 5){
 			InsertToRingBufferForDMA(Red);
-			InsertToRingBufferForDMA(Red);
+		}else{
+			if (RingBufferWS281x.Count < 10){
+				InsertToRingBufferForDMA(Black);
+			}
+		}
+		if (RingBufferWS281x.Count >= 10){
+			InsertToRingBufferForDMA(Green);
+		}
+		if (RingBufferWS281x.Count == 33){
+			stateWS281x = 2;
+		}
+		break;
+
+	case 2:
+		if (entryWS281x == 1){
 			DMA1_Stream4->CR |= DMA_SxCR_EN;
 			TIM3->EGR |= TIM_EGR_UG;
 			TIM3->CR1 |= TIM_CR1_CEN;
 		}
-		stateWS281x = 2;
-		break;
 
-	case 2:
-		if (SendLed< 32){
-			InsertToRingBufferForDMA(Red);
-			InsertToRingBufferForDMA(Red);
-			InsertToRingBufferForDMA(Red);
-			InsertToRingBufferForDMA(Red);
-		}else {
+		if (SendLed == 33){
 			/*** Очищаем все флаги прерываний DMA контроллера ***/
 			DMA1->HIFCR |= DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CFEIF4 | DMA_HIFCR_CTCIF4 | DMA_HIFCR_CHTIF4 | DMA_HIFCR_CTEIF4;
 			DMA1->HIFCR &= ~DMA_HIFCR_CDMEIF4 | ~DMA_HIFCR_CFEIF4 | ~DMA_HIFCR_CTCIF4 | ~DMA_HIFCR_CHTIF4 | ~DMA_HIFCR_CTEIF4;
@@ -225,8 +234,10 @@ void InsertToRingBufferForDMA (RGBColorType Color){
 					RingBufferWS281x.Push++;
 					count++;
 
-					if (RingBufferWS281x.Push == 240) RingBufferWS281x.Push = 0;
+					if (RingBufferWS281x.Push == 8160) RingBufferWS281x.Push = 0;
 			}
+
+			RingBufferWS281x.Count++;
 }
 
 /*************************  Конец блока функций для работы с цветами и буфером	*************************/

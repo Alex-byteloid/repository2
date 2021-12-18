@@ -18,10 +18,3 @@ S_DEPS += \
 %.o: ../%.s subdir.mk
 	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -c -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@" "$<"
 
-clean: clean--2e-
-
-clean--2e-:
-	-$(RM) ./startup_stm32f411xe.d ./startup_stm32f411xe.o
-
-.PHONY: clean--2e-
-
