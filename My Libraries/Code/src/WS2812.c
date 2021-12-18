@@ -20,13 +20,13 @@ struct RingBuffer{
 	uint16_t Count;						// Количество байт, сохранённых в буфере на текущий момент
 }RingBufferWS281x;
 
-uint8_t BufferDMAforWS [120];
+uint8_t BufferDMAforWS [240];
 
 uint32_t LedStrip [NumberOfLeds];
 uint32_t SendLed;
 
-uint8_t DmaBufer0 [24];
-uint8_t DmaBufer1 [24];
+uint16_t DmaBufer0 [24];
+uint16_t DmaBufer1 [24];
 
 uint8_t Bufer0Pointer;
 uint8_t Bufer1Pointer;
@@ -90,8 +90,8 @@ void InitDMAforTIM3 (void){
 	DMA1_Stream4->CR |= DMA_SxCR_CHSEL_2;					// Выбираем канал 5, 4 потока DMA для работы с 1 каналом таймера 3
 
 	DMA1_Stream4->PAR = (uint32_t) & TIM3->CCR1;			// Адрес переферийного модуля
-	DMA1_Stream4->M0AR = (uint32_t) & BufferDMAforWS[0];	// Адрес первого буфера в памяти
-//	DMA1_Stream4->M1AR = (uint32_t) & BufferDMAforWS[24];	// Адрес второго буфера в памяти
+	DMA1_Stream4->M0AR = (uint32_t) & DmaBufer0 [0];;		// Адрес первого буфера в памяти
+	DMA1_Stream4->M1AR = (uint32_t) & DmaBufer1 [0];		// Адрес второго буфера в памяти
 
 	DMA1_Stream4->NDTR = 24;								// Количество передач DMA
 
@@ -115,18 +115,22 @@ void DMA1_Stream4_IRQHandler (void){
 
 	SendLed++;																		// Инкрементируем переменную-счётчик
 
-	DMA1->HIFCR |= DMA_HIFCR_CTCIF4;												// Сбрасываем флаг прерывания
-
-	RingBufferWS281x.Out = RingBufferWS281x.Out + 24;
-	if (RingBufferWS281x.Out == 119) RingBufferWS281x.Out = 0;
+	if (RingBufferWS281x.Out == 240) RingBufferWS281x.Out = 0;
 
 	if ((DMA1_Stream4->CR & DMA_SxCR_CT) == DMA_SxCR_CT){
-		DMA1_Stream4->M0AR = (uint32_t) & BufferDMAforWS[RingBufferWS281x.Out];		//
+		for(uint8_t s = 0; s < 24; s++){
+			DmaBufer0[s] = (uint16_t)BufferDMAforWS[RingBufferWS281x.Out];		//
+			RingBufferWS281x.Out++;
+		}
 	}
 	else{
-		DMA1_Stream4->M1AR = (uint32_t) & BufferDMAforWS[RingBufferWS281x.Out];		//
+		for(uint8_t s = 0; s < 24; s++){
+			DmaBufer1[s] = (uint16_t)BufferDMAforWS[RingBufferWS281x.Out];		//
+			RingBufferWS281x.Out++;
+		}
 	}
 
+	DMA1->HIFCR |= DMA_HIFCR_CTCIF4;												// Сбрасываем флаг прерывания
 }
 /*************************	Конец блока функций инициализации аппаратной части	*************************/
 
@@ -158,16 +162,19 @@ void ProcessWS281xFSM (void){
 		if (entryWS281x == 1){
 			InsertToRingBufferForDMA(Black);
 			InsertToRingBufferForDMA(Black);
+			InsertToRingBufferForDMA(Red);
+			InsertToRingBufferForDMA(Red);
 			DMA1_Stream4->CR |= DMA_SxCR_EN;
+			TIM3->EGR |= TIM_EGR_UG;
 			TIM3->CR1 |= TIM_CR1_CEN;
-			InsertToRingBufferForDMA(Red);
-			InsertToRingBufferForDMA(Red);
 		}
 		stateWS281x = 2;
 		break;
 
 	case 2:
 		if (SendLed< 32){
+			InsertToRingBufferForDMA(Red);
+			InsertToRingBufferForDMA(Red);
 			InsertToRingBufferForDMA(Red);
 			InsertToRingBufferForDMA(Red);
 		}else {
@@ -218,7 +225,7 @@ void InsertToRingBufferForDMA (RGBColorType Color){
 					RingBufferWS281x.Push++;
 					count++;
 
-					if (RingBufferWS281x.Push == 119) RingBufferWS281x.Push = 0;
+					if (RingBufferWS281x.Push == 240) RingBufferWS281x.Push = 0;
 			}
 }
 

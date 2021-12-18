@@ -18,3 +18,10 @@ C_DEPS += \
 CMSIS/src/%.o: ../CMSIS/src/%.c CMSIS/src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -c -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries" -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries/CMSIS/inc" -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries/Code/inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
 
+clean: clean-CMSIS-2f-src
+
+clean-CMSIS-2f-src:
+	-$(RM) ./CMSIS/src/system_stm32f4xx.d ./CMSIS/src/system_stm32f4xx.o
+
+.PHONY: clean-CMSIS-2f-src
+

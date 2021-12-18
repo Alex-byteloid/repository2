@@ -45,3 +45,10 @@ C_DEPS += \
 Code/src/%.o: ../Code/src/%.c Code/src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -c -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries" -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries/CMSIS/inc" -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries/Code/inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
 
+clean: clean-Code-2f-src
+
+clean-Code-2f-src:
+	-$(RM) ./Code/src/CRC16.d ./Code/src/CRC16.o ./Code/src/I2C.d ./Code/src/I2C.o ./Code/src/WS2812.d ./Code/src/WS2812.o ./Code/src/lcd16xx.d ./Code/src/lcd16xx.o ./Code/src/ledFSM.d ./Code/src/ledFSM.o ./Code/src/main.d ./Code/src/main.o ./Code/src/messages.d ./Code/src/messages.o ./Code/src/modbus.d ./Code/src/modbus.o ./Code/src/system.d ./Code/src/system.o ./Code/src/virtualTimers.d ./Code/src/virtualTimers.o
+
+.PHONY: clean-Code-2f-src
+
