@@ -15,7 +15,7 @@
 #define ReceptionEnabled	100
 
 // Идентификаторы глобальных таймеров
-#define GTimer1		0
+#define WS28Timer	0
 #define I2C1Timer 	1
 #define LCDTimer 	2
 #define LEDTimer	3

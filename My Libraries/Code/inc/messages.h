@@ -18,6 +18,8 @@
 
 #define WS28LedStart				2
 #define WS28EndOfTransfer			3
+#define WS28StartEffect				4
+#define WS28EndSending				5
 
 #define I2C1StartTransaction	10					// Начать передачу
 #define I2C1SendByteComplete	11					// Байт отправлен, стоп условие сгенерировано

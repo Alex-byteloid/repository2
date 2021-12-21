@@ -19,23 +19,27 @@ uint8_t stateWS281x;
 uint8_t _stateWS281x;
 uint8_t entryWS281x;
 
-uint32_t SendLed;
+uint8_t stateEffectsWS28;
+uint8_t _stateEffectsWS28;
+uint8_t entryEffectsWS28;
+
+uint32_t SendingCountForEffect;
 
 uint32_t Stairs [NumberOfStairs][NumberOfLeds];
 
 uint16_t DmaBufer0 [24];
 uint16_t DmaBufer1 [24];
 
-RGBColorType Red = {128, 0, 0};
-RGBColorType Orange = {128, 34, 0};
-RGBColorType Yellow = {128, 128, 0};
-RGBColorType Green = {0, 128, 0};
-RGBColorType DeepSkyBlue = {0, 95, 128};
-RGBColorType NavyBlue = {0, 0, 128};
-RGBColorType Violet = {74, 0, 105};
-RGBColorType DeepPink = {128, 0, 128};
-RGBColorType White = {128, 128, 128};
-RGBColorType Black = {0, 0, 0};
+const RGBColorType Red = {128, 0, 0};
+const RGBColorType Orange = {128, 34, 0};
+const RGBColorType Yellow = {128, 128, 0};
+const RGBColorType Green = {0, 128, 0};
+const RGBColorType DeepSkyBlue = {0, 95, 128};
+const RGBColorType NavyBlue = {0, 0, 128};
+const RGBColorType Violet = {74, 0, 105};
+const RGBColorType DeepPink = {128, 0, 128};
+const RGBColorType White = {128, 128, 128};
+const RGBColorType Black = {0, 0, 0};
 
 /*************************	 Code	*************************/
 
@@ -158,10 +162,14 @@ void InitWS281xFSM (void){
 	InitTIM3();
 	InitDMAforTIM3();
 
+	SendingCountForEffect = 0;
 	StairsPointer.LedOfStep = 0;
 	StairsPointer.StepOfStairs = 0;
 	stateWS281x = 0;
 	_stateWS281x = 0;
+
+	stateEffectsWS28 = 0;
+	_stateEffectsWS28 = 0;
 }
 
 void ProcessWS281xFSM (void){
@@ -181,14 +189,15 @@ void ProcessWS281xFSM (void){
 	case 1:
 		if (entryWS281x == 1){
 			InsertColorToAllStairsBuffer(Black);
+			InsertColorToMULTIPLELEDStairsBuffer(Green, 1, 1, 4);
+			InsertColorToMULTIPLELEDStairsBuffer(Yellow, 2, 1, 4);
+			InsertColorToMULTIPLELEDStairsBuffer(Red, 3, 1, 4);
+			InsertColorToMULTIPLELEDStairsBuffer(Orange, 4, 1, 4);
+			InsertColorToMULTIPLELEDStairsBuffer(DeepSkyBlue, 5, 1, 4);
+			InsertColorToMULTIPLELEDStairsBuffer(Violet, 6, 1, 4);
+			InsertColorToMULTIPLELEDStairsBuffer(NavyBlue, 7, 1, 4);
+			InsertColorToMULTIPLELEDStairsBuffer(DeepPink, 8, 1, 4);
 		}
-
-		InsertColorToONELEDStairsBuffer(NavyBlue, 0, 1);
-		InsertColorToONELEDStairsBuffer(NavyBlue, 0, 2);
-		InsertColorToONELEDStairsBuffer(Green, 1, 1);
-		InsertColorToONELEDStairsBuffer(Green, 1, 2);
-		InsertColorToONELEDStairsBuffer(Red, 7, 3);
-
 		stateWS281x = 2;
 		break;
 
@@ -196,6 +205,7 @@ void ProcessWS281xFSM (void){
 		if (entryWS281x == 1){
 			for (uint8_t c = 0; c < 24; c++)DmaBufer0[c] = 0;
 			DMA1_Stream4->CR |= DMA_SxCR_EN;
+			TIM3->DIER |= TIM_DIER_CC1DE;
 			TIM3->EGR |= TIM_EGR_UG;
 			TIM3->CR1 |= TIM_CR1_CEN;
 		}
@@ -203,7 +213,7 @@ void ProcessWS281xFSM (void){
 		if (GetMessage(WS28EndOfTransfer)){
 			/* Очищаем все флаги прерываний DMA контроллера */
 			DMA1->HIFCR |= DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CFEIF4 | DMA_HIFCR_CTCIF4 | DMA_HIFCR_CHTIF4 | DMA_HIFCR_CTEIF4;
-			DMA1->HIFCR &= ~DMA_HIFCR_CDMEIF4 | ~DMA_HIFCR_CFEIF4 | ~DMA_HIFCR_CTCIF4 | ~DMA_HIFCR_CHTIF4 | ~DMA_HIFCR_CTEIF4;
+//			DMA1->HIFCR &= ~DMA_HIFCR_CDMEIF4 | ~DMA_HIFCR_CFEIF4 | ~DMA_HIFCR_CTCIF4 | ~DMA_HIFCR_CHTIF4 | ~DMA_HIFCR_CTEIF4;
 			TIM3->DIER &= ~TIM_DIER_CC1DE;										// Запрещаем запросы к DMA от таймера
 			TIM3->CR1 &= ~TIM_CR1_CEN;											// Отключаем таймер TIM3
 			DMA1_Stream4->CR &= ~DMA_SxCR_EN;									// Отключаем DMA
@@ -215,9 +225,58 @@ void ProcessWS281xFSM (void){
 
 	case 3:
 		if (entryWS281x == 1){
-			ClearStairsBuffer();
+			SendMessage(WS28EndSending, 0, 0);
+		}
+
+		if (GetMessage(WS28LedStart)){
+			stateWS281x = 2;
 		}
 		break;
+	}
+
+}
+
+void ProcessEffectsWS281xFSM (void){
+
+	if (stateEffectsWS28 != _stateEffectsWS28)entryEffectsWS28 = 1; else entryEffectsWS28 = 0;
+	_stateEffectsWS28 = stateEffectsWS28;
+
+	switch (stateEffectsWS28){
+
+	case 0:
+		if (GetMessage(WS28StartEffect)){
+			stateEffectsWS28 = 1;
+			SendingCountForEffect = 1;
+		}
+		break;
+
+	case 1:
+		if (entryEffectsWS28 == 1){
+			ClearStairsBuffer();
+			InsertColorToAllStairsBuffer(Black);
+			InsertColorToMULTIPLELEDStairsBuffer(Red, SendingCountForEffect, 2, 3);
+			SendMessage(WS28LedStart, 0, 0);
+		}
+		if (GetMessage(WS28EndSending)){
+			StartGTimer(WS28Timer);
+			++SendingCountForEffect;
+		}
+
+		if (GetGTimerVal(WS28Timer) >= 800){
+			InsertColorToMULTIPLELEDStairsBuffer(Red, SendingCountForEffect, 2, 3);
+			StopGTimer(WS28Timer);
+			SendMessage(WS28LedStart, 0, 0);
+		}
+
+		if (SendingCountForEffect == 8){
+			stateEffectsWS28 = 2;
+			StopGTimer(WS28Timer);
+		}
+		break;
+
+	case 2:
+		break;
+
 	}
 
 }
@@ -248,7 +307,7 @@ void InsertColorToONELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber,
 	Stairs [StairsNumber][LedNumber] |= Color.Blue;
 }
 
-void InsertColorToMULTIPLELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber, uint16_t LedNumberLeft, uint16_t LedNumberRight){
+void InsertColorToMULTIPLELEDStairsBuffer (RGBColorType Colores, uint16_t StairsNumber, uint16_t LedNumberLeft, uint16_t LedNumberRight){
 
 	uint16_t LedCount;
 
@@ -259,21 +318,21 @@ void InsertColorToMULTIPLELEDStairsBuffer (RGBColorType Color, uint16_t StairsNu
 	--LedNumberRight;
 
 	for (uint16_t i = 0; i < LedCount; i++){
-		Stairs [StairsNumber][LedNumberLeft] |= Color.Green;
+		Stairs [StairsNumber][LedNumberLeft] |= Colores.Green;
 		Stairs [StairsNumber][LedNumberLeft] <<= 8;
-		Stairs [StairsNumber][LedNumberLeft] |= Color.Red;
+		Stairs [StairsNumber][LedNumberLeft] |= Colores.Red;
 		Stairs [StairsNumber][LedNumberLeft] <<= 8;
-		Stairs [StairsNumber][LedNumberLeft] |= Color.Blue;
+		Stairs [StairsNumber][LedNumberLeft] |= Colores.Blue;
 		++LedNumberLeft;
 	}
 }
 
-void InsertColorToAllStairsBuffer (RGBColorType Color){
+void InsertColorToAllStairsBuffer (RGBColorType Coloress){
 
-	for (uint8_t StairsCount = 0; StairsCount < NumberOfStairs; StairsCount++){
+	for (uint16_t StairsCount = 1; StairsCount <= NumberOfStairs; StairsCount++){
 
-		for (uint8_t LedCount = 0; LedCount < NumberOfLeds; LedCount++){
-				InsertColorToStairsBuffer(Color, StairsCount, LedCount);
+		for (uint16_t LedCount = 1; LedCount <= NumberOfLeds; LedCount++){
+			InsertColorToONELEDStairsBuffer(Coloress, StairsCount, LedCount);
 		}
 	}
 }

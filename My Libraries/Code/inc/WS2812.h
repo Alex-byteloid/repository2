@@ -25,8 +25,9 @@ void DMA1_Stream4_IRQHandler (void);
 
 void InitWS281xFSM (void);
 void ProcessWS281xFSM (void);
+void ProcessEffectsWS281xFSM (void);
 
 void ClearStairsBuffer (void);
 void InsertColorToONELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber, uint16_t LedNumber);
-void InsertColorToMULTIPLELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber, uint16_t LedNumberLeft, uint16_t LedNumberRight);
-void InsertColorToAllStairsBuffer (RGBColorType Color);
+void InsertColorToMULTIPLELEDStairsBuffer (RGBColorType Colores, uint16_t StairsNumber, uint16_t LedNumberLeft, uint16_t LedNumberRight);
+void InsertColorToAllStairsBuffer (RGBColorType Coloress);
