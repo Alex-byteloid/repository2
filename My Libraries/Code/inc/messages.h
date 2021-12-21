@@ -16,7 +16,8 @@
 
 #define LedOnMsg				1
 
-#define WSLedStart				2
+#define WS28LedStart				2
+#define WS28EndOfTransfer			3
 
 #define I2C1StartTransaction	10					// Начать передачу
 #define I2C1SendByteComplete	11					// Байт отправлен, стоп условие сгенерировано

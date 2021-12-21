@@ -15,11 +15,8 @@ typedef struct RGB {
 	uint8_t Blue;
 }RGBColorType;
 
-#define NumberOfLeds		32
-#define Bufer0				0
-#define Bufer1				1
-#define BuferIsActive		1
-#define BuferIsDisable		0
+#define NumberOfStairs		8
+#define NumberOfLeds		4
 
 /*************************	 Code	*************************/
 void InitTIM3 (void);
@@ -28,4 +25,8 @@ void DMA1_Stream4_IRQHandler (void);
 
 void InitWS281xFSM (void);
 void ProcessWS281xFSM (void);
-void InsertToRingBufferForDMA (RGBColorType Color);
+
+void ClearStairsBuffer (void);
+void InsertColorToONELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber, uint16_t LedNumber);
+void InsertColorToMULTIPLELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber, uint16_t LedNumberLeft, uint16_t LedNumberRight);
+void InsertColorToAllStairsBuffer (RGBColorType Color);

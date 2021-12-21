@@ -8,41 +8,34 @@
 
 /********************* Global Variables *********************/
 
+struct Pointer{
+	uint16_t StepOfStairs;
+	uint16_t LedOfStep;
+}StairsPointer;
+
+uint32_t GRB;
+
 uint8_t stateWS281x;
 uint8_t _stateWS281x;
 uint8_t entryWS281x;
 
-
-struct RingBuffer{
-	uint16_t Push;						// Текущая позиция вставки
-	uint16_t Out;						// Текущая позиция выборки
-	uint16_t Size;						// Размер кольцевого буфера
-	uint16_t Count;						// Количество байт, сохранённых в буфере на текущий момент
-}RingBufferWS281x;
-
-uint8_t BufferDMAforWS [8160];			// Буфер на 340 светодиодов (Отправляется на ленту в течение примерно 10 мс)
-
-uint32_t LedStrip [NumberOfLeds];
 uint32_t SendLed;
+
+uint32_t Stairs [NumberOfStairs][NumberOfLeds];
 
 uint16_t DmaBufer0 [24];
 uint16_t DmaBufer1 [24];
 
-uint8_t Bufer0Pointer;
-uint8_t Bufer1Pointer;
-
-
-
-/*const struct*/ RGBColorType Red = {128, 0, 0};
-/*const struct*/ RGBColorType Orange = {128, 34, 0};
-/*const struct*/ RGBColorType Yellow = {128, 128, 0};
-/*const struct*/ RGBColorType Green = {0, 128, 0};
-/*const struct*/ RGBColorType DeepSkyBlue = {0, 95, 128};
-/*const struct*/ RGBColorType NavyBlue = {0, 0, 128};
-/*const struct*/ RGBColorType Violet = {74, 0, 105};
-/*const struct*/ RGBColorType DeepPink = {128, 0, 128};
-/*const struct*/ RGBColorType White = {128, 128, 128};
-/*const struct*/ RGBColorType Black = {0, 0, 0};
+RGBColorType Red = {128, 0, 0};
+RGBColorType Orange = {128, 34, 0};
+RGBColorType Yellow = {128, 128, 0};
+RGBColorType Green = {0, 128, 0};
+RGBColorType DeepSkyBlue = {0, 95, 128};
+RGBColorType NavyBlue = {0, 0, 128};
+RGBColorType Violet = {74, 0, 105};
+RGBColorType DeepPink = {128, 0, 128};
+RGBColorType White = {128, 128, 128};
+RGBColorType Black = {0, 0, 0};
 
 /*************************	 Code	*************************/
 
@@ -104,6 +97,7 @@ void InitDMAforTIM3 (void){
 	DMA1_Stream4->CR |= DMA_SxCR_DIR_0;						// Направление передачи: из памяти в периферию
 
 	DMA1_Stream4->CR |= DMA_SxCR_TCIE;						// Включение генерации прерывания после окончания передачи
+	DMA1_Stream4->CR |= DMA_SxCR_HTIE;						// Включение генерации прерывания после половины передачи
 	DMA1_Stream4->CR |= DMA_SxCR_DBM;						// Включение режима двойного буфера
 	DMA1_Stream4->CR |= DMA_SxCR_CIRC;						// Цикличный режим включен
 	DMA1_Stream4->CR &= ~DMA_SxCR_CT;						// Область памяти для первой передачи --> M0AR
@@ -113,24 +107,48 @@ void InitDMAforTIM3 (void){
 
 void DMA1_Stream4_IRQHandler (void){
 
-	SendLed++;																		// Инкрементируем переменную-счётчик
+		if (DMA1->HISR & DMA_HISR_HTIF4){
 
-	if (RingBufferWS281x.Out == 8160) RingBufferWS281x.Out = 0;
+			if ((StairsPointer.StepOfStairs < NumberOfStairs)&&(StairsPointer.LedOfStep < NumberOfLeds)){
+				if(DMA1_Stream4->CR & DMA_SxCR_CT){
 
-	if ((DMA1_Stream4->CR & DMA_SxCR_CT) == DMA_SxCR_CT){
-		for(uint8_t s = 0; s < 24; s++){
-			DmaBufer0[s] = (uint16_t)BufferDMAforWS[RingBufferWS281x.Out];		//
-			RingBufferWS281x.Out++;
-		}
+					GRB = Stairs[StairsPointer.StepOfStairs][StairsPointer.LedOfStep];
+					for (int8_t count = 0; count < 24; count++){
+						if ((GRB & 0x800000) == 0x800000){
+							DmaBufer0[count] = 82;
+						}else{
+							DmaBufer0[count] = 39;
+						}
+						GRB = GRB << 1;
+					}
+				}else {
+					GRB = Stairs[StairsPointer.StepOfStairs][StairsPointer.LedOfStep];
+
+					for (int8_t count = 0; count < 24; count++){
+
+						if ((GRB & 0x800000) == 0x800000){
+							DmaBufer1[count] = 82;
+						}else{
+							DmaBufer1[count] = 39;
+						}
+						GRB = GRB << 1;
+					}
+				}
+			}
+		DMA1->HIFCR |= DMA_HIFCR_CHTIF4;										// Сбрасываем флаг прерывания по половине передачи
 	}
-	else{
-		for(uint8_t s = 0; s < 24; s++){
-			DmaBufer1[s] = (uint16_t)BufferDMAforWS[RingBufferWS281x.Out];		//
-			RingBufferWS281x.Out++;
-		}
-	}
 
-	DMA1->HIFCR |= DMA_HIFCR_CTCIF4;												// Сбрасываем флаг прерывания
+	if (DMA1->HISR & DMA_HISR_TCIF4){
+		StairsPointer.LedOfStep++;
+		if (StairsPointer.LedOfStep == NumberOfLeds){
+			StairsPointer.LedOfStep = 0;
+			StairsPointer.StepOfStairs++;
+			if (StairsPointer.StepOfStairs == NumberOfStairs){
+				SendMessage(WS28EndOfTransfer, 0, 0);
+			}
+		}
+		DMA1->HIFCR |= DMA_HIFCR_CTCIF4;										// Сбрасываем флаг прерывания по окончанию передачи
+	}
 }
 /*************************	Конец блока функций инициализации аппаратной части	*************************/
 
@@ -140,7 +158,8 @@ void InitWS281xFSM (void){
 	InitTIM3();
 	InitDMAforTIM3();
 
-	SendLed = 0;
+	StairsPointer.LedOfStep = 0;
+	StairsPointer.StepOfStairs = 0;
 	stateWS281x = 0;
 	_stateWS281x = 0;
 }
@@ -153,55 +172,52 @@ void ProcessWS281xFSM (void){
 	switch(stateWS281x){
 
 	case 0:
-		if (GetMessage(WSLedStart)){
+		if (GetMessage(WS28LedStart)){
+			ClearStairsBuffer();
 			stateWS281x = 1;
 		}
 		break;
 
 	case 1:
 		if (entryWS281x == 1){
-//			InsertToRingBufferForDMA(Black);
-//			InsertToRingBufferForDMA(Black);
+			InsertColorToAllStairsBuffer(Black);
 		}
 
-		if (RingBufferWS281x.Count < 5){
-			InsertToRingBufferForDMA(Red);
-		}else{
-			if (RingBufferWS281x.Count < 10){
-				InsertToRingBufferForDMA(Black);
-			}
-		}
-		if (RingBufferWS281x.Count >= 10){
-			InsertToRingBufferForDMA(Green);
-		}
-		if (RingBufferWS281x.Count == 33){
-			stateWS281x = 2;
-		}
+		InsertColorToONELEDStairsBuffer(NavyBlue, 0, 1);
+		InsertColorToONELEDStairsBuffer(NavyBlue, 0, 2);
+		InsertColorToONELEDStairsBuffer(Green, 1, 1);
+		InsertColorToONELEDStairsBuffer(Green, 1, 2);
+		InsertColorToONELEDStairsBuffer(Red, 7, 3);
+
+		stateWS281x = 2;
 		break;
 
 	case 2:
 		if (entryWS281x == 1){
+			for (uint8_t c = 0; c < 24; c++)DmaBufer0[c] = 0;
 			DMA1_Stream4->CR |= DMA_SxCR_EN;
 			TIM3->EGR |= TIM_EGR_UG;
 			TIM3->CR1 |= TIM_CR1_CEN;
 		}
 
-		if (SendLed == 33){
-			/*** Очищаем все флаги прерываний DMA контроллера ***/
+		if (GetMessage(WS28EndOfTransfer)){
+			/* Очищаем все флаги прерываний DMA контроллера */
 			DMA1->HIFCR |= DMA_HIFCR_CDMEIF4 | DMA_HIFCR_CFEIF4 | DMA_HIFCR_CTCIF4 | DMA_HIFCR_CHTIF4 | DMA_HIFCR_CTEIF4;
 			DMA1->HIFCR &= ~DMA_HIFCR_CDMEIF4 | ~DMA_HIFCR_CFEIF4 | ~DMA_HIFCR_CTCIF4 | ~DMA_HIFCR_CHTIF4 | ~DMA_HIFCR_CTEIF4;
 			TIM3->DIER &= ~TIM_DIER_CC1DE;										// Запрещаем запросы к DMA от таймера
+			TIM3->CR1 &= ~TIM_CR1_CEN;											// Отключаем таймер TIM3
 			DMA1_Stream4->CR &= ~DMA_SxCR_EN;									// Отключаем DMA
+			StairsPointer.LedOfStep = 0;
+			StairsPointer.StepOfStairs = 0;
 			stateWS281x = 3;
 		}
 		break;
 
 	case 3:
 		if (entryWS281x == 1){
-			TIM3->CR1 &= ~TIM_CR1_CEN;											// Отключаем таймер TIM3
+			ClearStairsBuffer();
 		}
 		break;
-
 	}
 
 }
@@ -210,34 +226,56 @@ void ProcessWS281xFSM (void){
 
 /*************************	Блок функций для работы с цветами и буфером	*************************/
 
-void InsertToRingBufferForDMA (RGBColorType Color){
+void ClearStairsBuffer (void){
 
-	uint32_t GRB = 0;
+	for (uint8_t StairsCount = 0; StairsCount < NumberOfStairs; StairsCount++){
 
-	GRB |= Color.Green;
-	GRB <<= 8;
-	GRB |= Color.Red;
-	GRB <<= 8;
-	GRB |= Color.Blue;
+		for (uint8_t LedCount = 0; LedCount < NumberOfLeds; LedCount++){
+			Stairs [StairsCount][LedCount] = 0;
+		}
+	}
+}
 
-			for (int8_t count = 0; count < 24;){
+void InsertColorToONELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber, uint16_t LedNumber){
 
-					if ((GRB & 0x800000) == 0x800000){
-						BufferDMAforWS[RingBufferWS281x.Push] = 82;
-					}
-					else{
-						BufferDMAforWS[RingBufferWS281x.Push] = 39;
-					}
+	--StairsNumber;
+	--LedNumber;
 
-					GRB = GRB << 1;
+	Stairs [StairsNumber][LedNumber] |= Color.Green;
+	Stairs [StairsNumber][LedNumber] <<= 8;
+	Stairs [StairsNumber][LedNumber] |= Color.Red;
+	Stairs [StairsNumber][LedNumber] <<= 8;
+	Stairs [StairsNumber][LedNumber] |= Color.Blue;
+}
 
-					RingBufferWS281x.Push++;
-					count++;
+void InsertColorToMULTIPLELEDStairsBuffer (RGBColorType Color, uint16_t StairsNumber, uint16_t LedNumberLeft, uint16_t LedNumberRight){
 
-					if (RingBufferWS281x.Push == 8160) RingBufferWS281x.Push = 0;
-			}
+	uint16_t LedCount;
 
-			RingBufferWS281x.Count++;
+	LedCount = (LedNumberRight - LedNumberLeft) + 1;
+
+	--StairsNumber;
+	--LedNumberLeft;
+	--LedNumberRight;
+
+	for (uint16_t i = 0; i < LedCount; i++){
+		Stairs [StairsNumber][LedNumberLeft] |= Color.Green;
+		Stairs [StairsNumber][LedNumberLeft] <<= 8;
+		Stairs [StairsNumber][LedNumberLeft] |= Color.Red;
+		Stairs [StairsNumber][LedNumberLeft] <<= 8;
+		Stairs [StairsNumber][LedNumberLeft] |= Color.Blue;
+		++LedNumberLeft;
+	}
+}
+
+void InsertColorToAllStairsBuffer (RGBColorType Color){
+
+	for (uint8_t StairsCount = 0; StairsCount < NumberOfStairs; StairsCount++){
+
+		for (uint8_t LedCount = 0; LedCount < NumberOfLeds; LedCount++){
+				InsertColorToStairsBuffer(Color, StairsCount, LedCount);
+		}
+	}
 }
 
 /*************************  Конец блока функций для работы с цветами и буфером	*************************/

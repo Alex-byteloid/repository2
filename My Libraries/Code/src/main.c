@@ -27,7 +27,7 @@ int main (void){
 
 	InitLedFSM();
 	SendMessage(LedOnMsg, 0, 0);
-	SendMessage(WSLedStart, 0, 0);
+	SendMessage(WS28LedStart, 0, 0);
 	while(1){
 
 		ProcessLedFSM();
