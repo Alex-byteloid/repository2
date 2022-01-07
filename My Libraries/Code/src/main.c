@@ -28,11 +28,17 @@ int main (void){
 	InitLedFSM();
 	SendMessage(LedOnMsg, 0, 0);
 	SendMessage(WS28LedStart, 0, 0);
+	StartGTimer(LCDTimer);
 
 	while(1){
-
+		if (GetGTimerVal(LCDTimer) >= 6000){
+			StopGTimer(LCDTimer);
+			ResetGTimerVal(LCDTimer);
+			SendMessage(WS28StartEffect, 0, 0);
+		}
 		ProcessLedFSM();
 		ProcessWS281xFSM();
+		ProcessEffectsWS281xFSM();
 		ProcessMessage();
 
 	}

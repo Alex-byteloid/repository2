@@ -9,16 +9,17 @@
 
 /*************************	Define	*************************/
 
-#define MaxGTimers 		4 						// Максимальное количество глобальных таймеров
+#define MaxGTimers 		5 						// Максимальное количество глобальных таймеров
 
 #define ReceptionStopped	50
 #define ReceptionEnabled	100
 
 // Идентификаторы глобальных таймеров
-#define WS28Timer	0
-#define I2C1Timer 	1
-#define LCDTimer 	2
-#define LEDTimer	3
+#define WS28Timer		0
+#define WS28SoftTimer	1
+#define I2C1Timer 		2
+#define LEDTimer		3
+#define LCDTimer		4
 
 // Идентификаторы локальных таймеров
 #define LocTimer1	0
@@ -44,5 +45,6 @@ void StopGTimer(uint8_t GTimerID);			// Функция остановки выб
 void PauseGTimer(uint8_t GTimerID);			// Функция приостановки выбранного глобального таймера
 void ReleaseGTimer(uint8_t GTimerID);		// Функция продолжения счета выбранного глобального таймера
 uint32_t GetGTimerVal(uint8_t GTimerID);	// Функция получения значения выбранного глобального таймера
+void ResetGTimerVal (uint8_t GTimerID);		// Функция сброса значения таймера (работает только когда таймер остановлен)
 
 

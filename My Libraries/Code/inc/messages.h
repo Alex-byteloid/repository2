@@ -16,10 +16,10 @@
 
 #define LedOnMsg				1
 
-#define WS28LedStart				2
-#define WS28EndOfTransfer			3
-#define WS28StartEffect				4
-#define WS28EndSending				5
+#define WS28LedStart			2					// Запуск отправки записанного буфера в ленту
+#define WS28EndOfTransfer		3					// Передача последнего элемента буфера отправки завершена
+#define WS28StartEffect			4					// Запуск эффектов на ленте
+#define WS28TransactionComplete	5					// Передача полностью завершена, перефирия отключена
 
 #define I2C1StartTransaction	10					// Начать передачу
 #define I2C1SendByteComplete	11					// Байт отправлен, стоп условие сгенерировано

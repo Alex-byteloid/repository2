@@ -113,3 +113,9 @@ uint32_t GetGTimerVal(uint8_t GTimerID){
 	return GTimerVal[GTimerID];
 
 }
+
+void ResetGTimerVal (uint8_t GTimerID){
+	if (GTimerState[GTimerID] == TimerStopped){
+			GTimerVal[GTimerID] = 0;
+	}
+}
