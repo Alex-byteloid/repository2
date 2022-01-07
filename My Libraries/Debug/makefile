@@ -60,8 +60,8 @@ all: main-build
 main-build: My\ Libraries.elf secondary-outputs
 
 # Tool invocations
-My\ Libraries.elf: $(OBJS) $(USER_OBJS) C:\Users\Human\Documents\GitHub\repository2\My\ Libraries\LinkerScript.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "My Libraries.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Human\Documents\GitHub\repository2\My Libraries\LinkerScript.ld" --specs=nosys.specs -Wl,-Map="My Libraries.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+My\ Libraries.elf: $(OBJS) $(USER_OBJS) C:\Users\Aleksandr\Documents\GitHub\repository2\My\ Libraries\LinkerScript.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "My Libraries.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Aleksandr\Documents\GitHub\repository2\My Libraries\LinkerScript.ld" --specs=nosys.specs -Wl,-Map="My Libraries.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

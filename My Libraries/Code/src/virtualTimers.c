@@ -1,6 +1,10 @@
 /*********************** Description ************************/
 
-
+/*
+ * Концепт пока такой:
+ * Глобальный таймер - значение которого используется в нескольких функциях
+ * Локальный таймер - значение котоорого используется строго в одной функции
+ * */
 
 /************************* Includes *************************/
 
@@ -11,13 +15,13 @@
 uint8_t GTimerState [MaxGTimers];				// Хранение текущих состояний глобальных таймеров
 uint32_t GTimerVal	[MaxGTimers];				// Хранение текущих значений глобальных таймеров
 
-uint32_t GtimerCount;
 uint16_t MRTUcount;
 uint16_t ReceptionStatus;
 
-//uint8_t SysTickHandlerState;					// Переменная состаяния обработчика прерывания системного таймера для работы с Modbus
 
 /*************************	 Code	*************************/
+
+/*************************	 Функции аппаратной инициализации таймера	*************************/
 
 void InitTIM10 (void){
 
@@ -29,7 +33,6 @@ void InitTIM10 (void){
 
 	TIM10->DIER |= TIM_DIER_UIE;
 
-	GtimerCount = 0;
 	MRTUcount = 0;
 	ReceptionStatus = ReceptionStopped;
 
@@ -41,20 +44,20 @@ void InitTIM10 (void){
 
 void TIM1_UP_TIM10_IRQHandler (void){
 
-	for (uint8_t i = 0; i <= MaxGTimers; i++){
+		for (uint8_t i = 0; i <= MaxGTimers; i++){
 
-		if (GTimerState[i] == TimerRunning){
+				if (GTimerState[i] == TimerRunning){
 
-			GTimerVal[i]++;
-		}
-	}
+					GTimerVal[i]++;
+				}
+			}
 
 	if (ReceptionStatus == ReceptionEnabled){
 
 		MRTUcount++;
 
 		if (MRTUcount >= 5){
-			SendMessage(ModbusRTUTimeOut);
+			SendMessage(ModbusRTUTimeOut, 0, 0);
 			ReceptionStatus = ReceptionStopped;
 		}
 
@@ -64,42 +67,7 @@ void TIM1_UP_TIM10_IRQHandler (void){
 
 }
 
-
-/*void InitHardwareTimer (void){
-
-	SysTickHandlerState = 0;					// Обработчик прерывания системного таймера в состоянии 0
-
-	SysTick->LOAD = 95999;						// Загрузка значения перезагрузки. При 96 МГц, данное занечение соотвествует прерыванию каждые 1 мс.
-	SysTick->VAL = 95999;						// Обнуляем таймер и флаги.
-
-	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
-					SysTick_CTRL_TICKINT_Msk |
-					SysTick_CTRL_ENABLE_Msk;
-
-}
-
-void SysTick_Handler(void){
-
-	switch (SysTickHandlerState){
-
-	case 0:
-		for(uint8_t i = 0; i < MaxGTimers; i++){
-
-			if (GTimerState[i] == TimerRunning){
-				GTimerVal[i]++;
-			}
-		}
-		break;
-
-	case 1:
-		SendMessage(ModbusRTUTimeOut);
-		SysTickHandlerState = 0;
-		break;
-
-	}
-
-}*/
-
+/*************************	 Функции глобальных таймеров	*************************/
 
 void InitGTimer(void){
 
@@ -144,4 +112,10 @@ uint32_t GetGTimerVal(uint8_t GTimerID){
 
 	return GTimerVal[GTimerID];
 
+}
+
+void ResetGTimerVal (uint8_t GTimerID){
+	if (GTimerState[GTimerID] == TimerStopped){
+			GTimerVal[GTimerID] = 0;
+	}
 }

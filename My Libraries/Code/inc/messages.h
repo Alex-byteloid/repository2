@@ -1,5 +1,10 @@
 /*********************** Description ************************/
 
+/*
+ * 0 - Сообщение неактивно
+ * 1 - Сообщение установлено, но не активно
+ * 2 - Сообщение активно
+ * */
 
 /************************* Includes *************************/
 
@@ -7,11 +12,22 @@
 
 /*************************	Define	*************************/
 
-#define MaxNumbMessages		30
+#define MaxNumbMessages			30
 
-#define LedOnMsg			0
+#define LedOnMsg				1
 
+#define WS28LedStart			2					// Запуск отправки записанного буфера в ленту
+#define WS28EndOfTransfer		3					// Передача последнего элемента буфера отправки завершена
+#define WS28StartEffect			4					// Запуск эффектов на ленте
+#define WS28TransactionComplete	5					// Передача полностью завершена, перефирия отключена
 
+#define I2C1StartTransaction	10					// Начать передачу
+#define I2C1SendByteComplete	11					// Байт отправлен, стоп условие сгенерировано
+#define I2C1PauseTransaction	12					// Приостановка отправки буфера I2C1
+#define I2C1ReleaseTransaction	13					// Возобновить отправку буфера I2C1
+#define I2C1EndOfTransaction	14					// Заданное количество элементов буфера отправлено
+
+#define LCDStartInit			15					// Начать инициализацию дисплея
 
 #define ModbusError				21					// Ошибка Modbus
 #define ModbusReciveSymbol		22					// USART-Modbus принял символ
@@ -24,7 +40,7 @@
 /*************************	 Code	*************************/
 
 void InitMessage (void);
-void SendMessage (int Msg);
+void SendMessage (uint8_t Message, uint16_t ParametrOne, uint16_t ParametrTwo);
 void ProcessMessage (void);
-uint8_t GetMessage (int Msg);
+uint8_t GetMessage (uint8_t Message);
 

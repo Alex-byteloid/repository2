@@ -23,13 +23,22 @@ int main (void){
 	InitGTimer();
 	InitTIM10();
 	InitMessage();
-	InitModbusFSM(Baud9600, ParityControlOff, TwoStopBit, RTUMode);
-	SendMessage(LedOnMsg);
+	InitWS281xFSM();
+
+	InitLedFSM();
+	SendMessage(LedOnMsg, 0, 0);
+	SendMessage(WS28LedStart, 0, 0);
+	StartGTimer(LCDTimer);
 
 	while(1){
-
-		ProcessModbusSlaveFSM();
+		if (GetGTimerVal(LCDTimer) >= 6000){
+			StopGTimer(LCDTimer);
+			ResetGTimerVal(LCDTimer);
+			SendMessage(WS28StartEffect, 0, 0);
+		}
 		ProcessLedFSM();
+		ProcessWS281xFSM();
+		ProcessEffectsWS281xFSM();
 		ProcessMessage();
 
 	}

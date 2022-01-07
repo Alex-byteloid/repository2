@@ -6,6 +6,9 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Code/src/CRC16.c \
+../Code/src/I2C.c \
+../Code/src/WS2812.c \
+../Code/src/lcd16xx.c \
 ../Code/src/ledFSM.c \
 ../Code/src/main.c \
 ../Code/src/messages.c \
@@ -15,6 +18,9 @@ C_SRCS += \
 
 OBJS += \
 ./Code/src/CRC16.o \
+./Code/src/I2C.o \
+./Code/src/WS2812.o \
+./Code/src/lcd16xx.o \
 ./Code/src/ledFSM.o \
 ./Code/src/main.o \
 ./Code/src/messages.o \
@@ -24,6 +30,9 @@ OBJS += \
 
 C_DEPS += \
 ./Code/src/CRC16.d \
+./Code/src/I2C.d \
+./Code/src/WS2812.d \
+./Code/src/lcd16xx.d \
 ./Code/src/ledFSM.d \
 ./Code/src/main.d \
 ./Code/src/messages.d \
@@ -34,5 +43,5 @@ C_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 Code/src/%.o: ../Code/src/%.c Code/src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -c -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries" -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries/CMSIS/inc" -I"C:/Users/Human/Documents/GitHub/repository2/My Libraries/Code/inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -c -I"C:/Users/Aleksandr/Documents/GitHub/repository2/My Libraries" -I"C:/Users/Aleksandr/Documents/GitHub/repository2/My Libraries/CMSIS/inc" -I"C:/Users/Aleksandr/Documents/GitHub/repository2/My Libraries/Code/inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=soft -mthumb -o "$@"
 

@@ -8,7 +8,15 @@
 
 /********************* Global Variables *********************/
 
-char Messages[MaxNumbMessages];
+struct MSG{
+	char Msg;
+	uint16_t ParamOne;
+	uint16_t ParamTwo;
+};
+
+struct MSG Messages[MaxNumbMessages];
+
+
 
 /*************************	 Code	*************************/
 
@@ -17,34 +25,45 @@ void InitMessage (void){
 	int i;
 
 	for (i = 0; i < MaxNumbMessages; i++){
-		Messages[i] = '0';
+		Messages[i].Msg = '0';
+		Messages[i].ParamOne = 0;
+		Messages[i].ParamTwo = 0;
 	}
 }
 
-void SendMessage (int Msg){
+void SendMessage (uint8_t Message, uint16_t ParametrOne, uint16_t ParametrTwo){
 
-	Messages[Msg] = '1';
+	if (Messages[Message].Msg == '0'){
 
-/*	if (Messages[Msg] == '0'){
-
-		Messages[Msg] = '1';
-	}*/
+		Messages[Message].Msg = '1';
+		Messages[Message].ParamOne = ParametrOne;
+		Messages[Message].ParamTwo = ParametrTwo;
+	}
 }
 
 void ProcessMessage (void){
 
-	int i;
-	for(i = 0; i < MaxNumbMessages; i++){
+	for(uint8_t i = 0; i < MaxNumbMessages; i++){
 
-		if(Messages[i] == '2')Messages[i]='0';
-		if(Messages[i] == '1')Messages[i]='2';
+		if(Messages[i].Msg == '2'){
+			Messages[i].Msg = '0';
+			Messages[i].ParamOne = 0;
+			Messages[i].ParamTwo = 0;
+		}
+
+		if(Messages[i].Msg == '1')Messages[i].Msg = '2';
+
+		if(Messages[i].Msg == '0'){
+			Messages[i].ParamOne = 0;
+			Messages[i].ParamTwo = 0;
+		}
 	}
 }
 
-uint8_t GetMessage (int Msg){
+uint8_t GetMessage (uint8_t Message){
 
-	if(Messages[Msg] == '2'){
-		Messages[Msg] = '0';
+	if(Messages[Message].Msg == '2'){
+		Messages[Message].Msg = '0';
 		return 1;
 	}
 	return 0;
